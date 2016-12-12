@@ -152,7 +152,7 @@ fieldname: type-> property: value
 Once the app has been added to settings.py, you can run the tests with:
 
 ```bash
-$ python manage.py test paramfield
+$ python manage.py test param_field
 ```
 
 ## TODO
