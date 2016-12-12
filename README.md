@@ -3,8 +3,19 @@
 A Django model field that uses a DSL to define, generate, and validate, custom forms.
 
 After reading this [fantastic presentation](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-on how flexible can be a DSL to generate forms, I created a django implementation for
-some of my projects.
+on how flexible can be a DSL to generate forms, I implemented  a django version of
+this idea so now the circle is complete.
+
+django-param-field provides a model field where you to write something like this:
+
+```python
+width: Dimmension-> max:50.0 min:5.0
+height: Dimmension-> max:40.0 min:3.0
+painted : Bool-> default:False
+inscription: Text-> max_length:30
+```
+
+to generate a django equivalent form.
 
 
 ## Requirement
@@ -113,4 +124,6 @@ Once the app has been added to settings.py, you can run the tests with:
 $ python manage.py test paramfield
 ```
 
+## TODO
 
+* Finish and test FileField Support
