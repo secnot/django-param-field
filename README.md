@@ -121,22 +121,22 @@ class CustomProductFormView(FormView):
 Each ParamField can have one or more fields with the followin syntax
 
 ```bash
-fieldname: type-> (property: value)*
+fieldname: type-> property: value
 ```
 
 * **fieldname** - A lower case name including numbers and underscores,
 	it must start with a letter and has a max length of 30 characters.
 
 * **type** - One of the supported field types (All start with uppercase)    
-	Bool
-	Decimal
-	Dimmension
-	Integer
-	Text
-	TextArea
+	* Bool
+	* Decimal
+	* Dimmension
+	* Integer
+	* Text
+	* TextArea
 
-* **property** - One or more of the properties accepted by teh field type
-	followed by a value
+* **property** - One or more of the properties accepted by the field type
+	followed by a value.
 
 * **Values** - One of the value types supported by the property to its left
 	* boolean - True/False
