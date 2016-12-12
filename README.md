@@ -139,10 +139,10 @@ fieldname: type-> property: value
 	followed by a value.
 
 * **value** - One of the value types supported by the property to its left
-	* boolean - True/False
+	* Boolean - True/False
 	* Decimal - 1.33, 6.44
 	* Integer - 44
-	* String - "with scape char \\" this "
+	* String - "string with scape \\"chars\\" "
 	* Value list - [1, 2, 3]
 
 ## Testing
@@ -155,5 +155,5 @@ $ python manage.py test paramfield
 
 ## TODO
 
-* Finish and test FileField Support
+* Add FileField Support
 * Better parser error messages
