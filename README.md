@@ -107,6 +107,8 @@ class CustomProductFormView(FormView):
 
 	def get_form(self, form_class=None):
 		"""Generate form form param_field"""
+		# NOTE: params.form(...) will return None when it doesn't
+		# containt any field.
 		return self.product.params.form(**self.get_form_kwargs())
 
 	def form_valid(self, form):

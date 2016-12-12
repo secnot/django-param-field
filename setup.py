@@ -20,13 +20,12 @@ setup(
         'Framework :: Django',
 	'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Development Status :: 3 - Alpha',
-        'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3'], 
 
 	# Package
-	packages = ['param_field', 'param_field/tests/'],
-	install_requires = ['Django', 'pyparsing', 'unittest2'],
+        packages = ['param_field', 'param_field/tests/'],
+        install_requires = ['Django', 'pyparsing', 'unittest2'],
 	zip_safe = False, 
 	include_package_data=True,
 )
