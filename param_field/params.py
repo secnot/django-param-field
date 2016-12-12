@@ -9,7 +9,7 @@ from .limits import *
 
 class ParamDict(OrderedDict):
   
-    def __init__(self, fields='', fk_support=False):
+    def __init__(self, fields='', file_support=False):
         """
         Arguments:
             fields (str): String containig fields definitions.
@@ -19,7 +19,7 @@ class ParamDict(OrderedDict):
 
         self._original_source = fields
 
-        f = parse_fields(fields or '', fk_support=False)
+        f = parse_fields(fields or '', file_support=False)
         for name, field in f.items():
             self[name] = field
 
@@ -436,61 +436,9 @@ class TextAreaParam(TextParam):
     #TODO: Custom widget
 
 
-#TODO: Constant param
+#TODO: Support and test File Params
 #
 # 
-class ConstantParam(object):
-    pass
-
-# Foreign key params
-class ForeignKeyParam(Param):
-    native_type = models.Model
-    type_name = 'ForeignKey'
-    allowed_properties = [
-        ('label', str, ''),
-        ('help_text', str, ''),
-        ('choices', list, None),
-        ('default', str, None),
-        ('visible', bool, True)]
-
-    # Foreign key model, and field used as identification
-    model_class = models.Model
-    model_field = 'id'
-
-    def value_to_str(self, value):
-        if type(value) is self.model_class:
-            value = getattr(value, self.model_field)
-        super(ForeignKeyParam, self).value_to_str(value)
-
-    def deserialize_value(self, value):
-        if not isinstance(value, self.model_class):
-            try:
-                kwargs={self.model_field.__name__: value}
-                value = self.model_class.objects.get(**kwargs)
-            except Exception:
-                raise ValueError("Object {} does not exist".format(value))
-        
-        return super(Param, self).to_python(value)
-
-    def serialize_value(self, value):
-        if type(value) is self.model_class:
-            value = getattr(value, self.model_field)
-        
-        return super(ForeignKeyParam, self).serialize_value(value)
-
-class GeneratorParam(Param, StringMixin):
-    native_type = str
-    type_name = 'Generator'
-    allowed_properties = [
-        ('label', str, ''),
-        ('help_text', str, ''),
-        ('choices', list, None),
-        ('default', str, None), #Type used by serialized model value
-        ('visible', bool, True)]
-    #model_class = 
-    #model_field = 
-    #TODO: prep_value
-
 class FileParam(Param, StringMixin):
     native_type = str
     type_name = 'File'

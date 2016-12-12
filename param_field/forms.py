@@ -3,27 +3,6 @@ from .validators import *
 from .params import *
 
 
-class ForeignKeyField(forms.ModelChoiceField):
-    pass
-
-class ForeignKeyChoiceField(forms.ChoiceField):
-    pass
-
-class GeneratorField(forms.CharField):   
-    def to_python(self, value):
-        """Convert part generator slug"""
-        from .models import PartGenerator
-        try:
-            obj = PartGenerator.objects.get(slug=value)
-            return obj
-        except (ValueError, TypeError, ObjectDoesNotExist):
-            raise forms.ValidationError(
-                _("Unknown generator %(value)s"),
-                params={'value': value})
-
-
-
-
 FORM_FIELD_CLASS = {
     BoolParam: forms.BooleanField,
     TextParam: forms.CharField,
@@ -31,9 +10,8 @@ FORM_FIELD_CLASS = {
     IntegerParam: forms.IntegerField,
     DecimalParam: forms.DecimalField,
     DimmensionParam: forms.DecimalField,
-    GeneratorParam: ForeignKeyField,
-    FileParam: ForeignKeyField,
-    ImageParam: ForeignKeyField,
+    FileParam: forms.FileField,
+    ImageParam: forms.ImageField,
 }
 
 
@@ -55,25 +33,9 @@ def expand_name(name):
 
 
 
-def ForeignKeyFieldFactory(param, name):
-    """Form field factory for all params using one"""
-    choices = param.get_choices()
-    if choices:
-        # Construct a query that returns the models present in choices.
-        choices = [getattr(c, param.model_field) for c in choices]
-        query_args = {param.model_field+'__in': choices_field}
-        query = param.model_class.objects.filter(query_args)
-    else:
-        query = param.model_class.objects.all()
-
-    field_args = {
-        'help_text': param.help_text or None,
-        'label': param.label or expand_name(name),
-        'initial': param.default,
-        'required': param.default is None,
-        'queryset': query}
-
-    return forms.ModelChoiceField(**field_args)
+def FileFieldFactory(param, name):
+    """Form field factory for all File fields"""
+    raise NotImplementedError
 
 
 def StdFieldFactory(param, name):
@@ -99,8 +61,8 @@ def StdFieldFactory(param, name):
 
 def ParamFieldFactory(param, name):
     field_class = FORM_FIELD_CLASS[type(param)]
-    if field_class == ForeignKeyField:
-        return ForeignKeyFieldFactory(param, name)
+    if field_class in (forms.FileField, forms.ImageField):
+        return FileFieldFactory(param, name)
     else:
         return StdFieldFactory(param, name)
 
@@ -119,9 +81,6 @@ class ParamInputForm(forms.Form):
     """
     def __init__(self, *args, **kwargs):
         """
-        Argument:
-            part_gen (PartGenerator): Form's part generator instance
-
         """
         self._params = kwargs.pop('params')
         super(ParamInputForm, self).__init__(*args, **kwargs)

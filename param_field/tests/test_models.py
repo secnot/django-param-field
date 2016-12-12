@@ -26,7 +26,7 @@ class TestParamField(TestCase):
 
     def test_fk_support(self):
         # TODO: Test against foreign key params when implemented
-        pf = ParamField(fk_support=False)
+        pf = ParamField(file_support=False)
         params = "number: Integer->default: 12"
         parsed = pf.clean(params, None)
 

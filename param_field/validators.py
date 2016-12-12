@@ -3,16 +3,15 @@ from pyparsing import ParseBaseException
 
 
 class ParamValidator(object):
-    def __init__(self, fk_support=False):
-        self._fk_support = fk_support
-        self._fk_support = False
+    def __init__(self, file_support=False):
+        self._file_support = file_support
         
     def __call__(self, value):
 
         # Imported here to avoid circular dependency
         from .parser import parse_fields
         try:
-            par = parse_fields(value, self._fk_support)
+            par = parse_fields(value, self._file_support)
         except ParseBaseException as err:
             # Parser Error
             raise ValidationError(str(err))

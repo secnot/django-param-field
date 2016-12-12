@@ -17,12 +17,12 @@ class ParamField(models.TextField):
     def __init__(self, *args, **kwargs):
         """
         Arguments:
-            fk_support(bool): Enable or disable foreign key param support.
+            file_support(bool): Enable or disable support for file fields.
         """
         kwargs['max_length'] = MAX_PARAM_FIELD_LENGTH
         kwargs['blank'] = True
         
-        self._fk_support = kwargs.pop('fk_support', True)
+        self._file_support = kwargs.pop('file_support', True)
     
         super(ParamField, self).__init__(*args, **kwargs)
 
@@ -37,7 +37,7 @@ class ParamField(models.TextField):
             return value
 
         try:
-            return ParamDict(value, self._fk_support)
+            return ParamDict(value, self._file_support)
         except ParseBaseException as err:
             raise ValidationError(str(err))
         except ValueError as err:
@@ -55,7 +55,7 @@ class ParamField(models.TextField):
             return Value
 
         try:
-            return ParamDict(value, self._fk_support)
+            return ParamDict(value, self._file_support)
         except ParseBaseException as err:
             raise ValidationError(str(err))
         except ValueError as err:

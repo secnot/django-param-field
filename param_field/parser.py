@@ -134,15 +134,14 @@ def create_parser(types="Integer Dimmension Decimal Bool Text TextArea"):
 params = create_parser(
         types = "Integer Dimmension Decimal Bool Text TextArea")
 
-params_no_fk = create_parser(
+params_file = create_parser(
         types = "Integer Dimmension Decimal Bool Text TextArea")
 
 params.enablePackrat()
-params_no_fk.enablePackrat()
+params_file.enablePackrat()
 
 
-
-def parse_fields(input_str, fk_support=False):
+def parse_fields(input_str, file_support=False):
     """
     Arguments:
         input_str (string): 
@@ -150,12 +149,11 @@ def parse_fields(input_str, fk_support=False):
             File
             Image
     """ 
-    if fk_support:
-        raise NotImplementedError
-        # TODO: Not yet implemented
-        ast = params.parseString(input_str, parseAll=True)
+    if file_support:
+        # TODO: File parameter support
+        ast = params_file.parseString(input_str, parseAll=True)
     else:
-        ast = params_no_fk.parseString(input_str, parseAll=True)
+        ast = params.parseString(input_str, parseAll=True)
     
     d = OrderedDict()
     for name, field in ast:
