@@ -48,6 +48,10 @@ def StdFieldFactory(param, name):
         'required': param.default is None,
         'validators': [ParamFormFieldValidator(param),]}
 
+    # Change widget for hidden fields
+    if param.hidden or False:
+        field_args['widget'] = forms.HiddenInput()
+
     # Generate correct Field type or ChoiceField
     choices = param.get_choices()
     if choices:
@@ -87,8 +91,6 @@ class ParamInputForm(forms.Form):
        
         # Add all visible fields from ParamDict to the form
         for name, param in self._params.items():
-            if not param.visible or not isinstance(param, Param):
-                continue
             self.fields[name] = ParamFieldFactory(param, name)
 
     def clean(self):

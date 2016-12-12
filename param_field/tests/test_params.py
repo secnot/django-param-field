@@ -130,13 +130,23 @@ class TestParamDict(TestCase):
             self.assertTrue(name in str(d))
 
     def test_form_generation(self): 
-        
+
+        # test ParamDict.form() generates a valid Form
         d = ParamDict("""
             name_12345:Bool-> default:True label:"the label" """)
         form = d.form()
 
         self.assertIsInstance(form, ParamInputForm)
         self.assertTrue('name_12345' in form.as_p())
+
+        
+        # Test empty Dict returns None instead of empty form
+        d = ParamDict("")
+        form = d.form()
+        self.assertEqual(form, None)
+
+    
+
 
 class TestBaseParam(TestCase):
 
@@ -193,9 +203,9 @@ class TestBaseParam(TestCase):
         with self.assertRaises(ValueError):
             IntegerParam(help_text=12)
 
-        IntegerParam(visible=True)
+        IntegerParam(hidden=False, default=22)
         with self.assertRaises(ValueError):
-            IntegerParam(help_text=0)
+            IntegerParam(hidden=0)
 
         # String params
         TextParam(max_length=32)
@@ -313,8 +323,8 @@ class TestBaseParam(TestCase):
         p = BoolParam(default=True)
         self.assertEqual(p.to_str(), 'Bool-> default:True')
 
-        p = BoolParam(default=True, visible=False)
-        self.assertEqual(p.to_str(), 'Bool-> default:True visible:False')
+        p = BoolParam(default=True, hidden=False)
+        self.assertEqual(p.to_str(), 'Bool-> default:True')
 
         p = DecimalParam(min=Decimal('12.0'), max=Decimal('20.4'))
         self.assertEqual(p.to_str(), 'Decimal-> min:12.0 max:20.4')
@@ -403,32 +413,33 @@ class TestBaseParam(TestCase):
             with self.assertRaises(ValidationError):
                 p.validate(12)
 
-    def test_visible(self):
-        """Test invisible parameters require default value"""
-        IntegerParam(visible=False, default=12)
+    def test_hidden(self):
+        """Test hidden parameters require default value"""
+        IntegerParam(hidden=True, default=12)
         with self.assertRaises(ValueError):
-            IntegerParam(visible=False)
+            IntegerParam(hidden=True)
 
-        DecimalParam(visible=False, default=Decimal('23.3'))
+        DecimalParam(hidden=True, default=Decimal('23.3'))
         with self.assertRaises(ValueError):
-            DecimalParam(visible=False)
+            DecimalParam(hidden=True)
 
-        DimmensionParam(visible=False, default=Decimal('4'))
+        DimmensionParam(hidden=True, default=Decimal('4'))
         with self.assertRaises(ValueError):
-            DimmensionParam(visible=False)
+            DimmensionParam(hidden=True)
        
-        BoolParam(visible=False, default=True)
+        BoolParam(hidden=True, default=True)
         with self.assertRaises(ValueError):
-            BoolParam(visible=False)
+            BoolParam(hidden=True)
 
-        TextParam(visible=False, default="adfasd")
+        TextParam(hidden=True, default="adfasd")
         with self.assertRaises(ValueError):
-            TextParam(visible=False)
+            TextParam(hidden=True)
 
-        TextAreaParam(visible=False, default="asdf")
+        TextAreaParam(hidden=True, default="asdf")
         with self.assertRaises(ValueError):
-            TextAreaParam(visible=False)
+            TextAreaParam(hidden=True)
 
+        # TODO: Test choices are ignored when field is hidden
 
 
 class TestBoolParam(TestCase):

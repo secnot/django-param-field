@@ -152,42 +152,44 @@ class TestParamInputForm(TestCase):
         form = ParamInputForm(params=d, data={})
         self.assertTrue(form.is_valid())
 
-    def test_invisible_params(self):
+    def test_hidden_params(self):
         """Test invisible params are not present in the form"""
         d = ParamDict("""
                 number_holes:Integer->min:33
-                enable:Bool->default:False visible:False""")
+                enable:Bool->default:False hidden:True""")
 
         form_data = {'number_holes': 44 }
         form = ParamInputForm(params=d)
         self.assertTrue('number_holes' in form.as_p())
-        self.assertFalse('enable' in form.as_p())
+        self.assertTrue('enable' in form.as_p())
     
-        form_data = {'number_holes': 44, 'enabled':True}
+        form_data = {'number_holes': 44, 'enable':True}
         form = ParamInputForm(params=d, data=form_data)
         self.assertTrue('number_holes' in form.as_p())
-        self.assertFalse('enable' in form.as_p())
+        self.assertTrue('enable' in form.as_p())
+        self.assertTrue('hidden' in form.as_p())
         self.assertTrue(form.is_valid())
-        self.assertEqual(len(form.cleaned_data), 1)
+        self.assertEqual(len(form.cleaned_data), 2)
         self.assertEqual(form.cleaned_data['number_holes'], 44)
+        self.assertEqual(form.cleaned_data['enable'], True)
         
-        form_data = {'number_holes': 44, 'enabled':False}
+        form_data = {'number_holes': 44, 'enable':True}
         form = ParamInputForm(params=d, data=form_data)
         self.assertTrue('number_holes' in form.as_p())
-        self.assertFalse('enable' in form.as_p())
+        self.assertTrue('enable' in form.as_p())
         self.assertTrue(form.is_valid())
-        self.assertEqual(len(form.cleaned_data), 1)
+        self.assertEqual(len(form.cleaned_data), 2)
         self.assertEqual(form.cleaned_data['number_holes'], 44)
 
     def test_labels_from_name(self):
         """Test a label is generated for each field using field name"""
         d = ParamDict("""
                 number_of_holes:Integer->min:33
-                enable:Bool->default:False visible:False""")
+                enable:Bool->default:False hidden:True""")
 
         form = ParamInputForm(params=d)
         self.assertTrue('Number of holes' in form.as_p())
-        self.assertFalse('enable' in form.as_p())
+        self.assertTrue('enable' in form.as_p())
     
     def test_choices_present(self):
         """Test param choices are present in form"""

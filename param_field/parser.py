@@ -16,7 +16,7 @@ FIELD_TO_PARAM = {
 reserved_keywords = Keyword("Integer")|Keyword("Bool")|Keyword("Dimmension")\
         |Keyword("Decimal")|Keyword("Text")|Keyword("default")|Keyword("min_length")\
         |Keyword("max_length")|Keyword("min")|Keyword("max")|Keyword("help_text")\
-        |Keyword("label")|Keyword("visible")|Keyword("odd")|Keyword("even")|Keyword("choices")
+        |Keyword("label")|Keyword("hidden")|Keyword("odd")|Keyword("even")|Keyword("choices")
 cvtInt = lambda t: int(t[0])
 cvtDec = lambda t: Decimal(t[0])
 cvtBool = lambda t: (True if t[0]=="True" else False)
@@ -105,7 +105,7 @@ lst = Group(lbrack+lst_elem+ZeroOrMore(comma+lst_elem)+Optional(comma)+rbrack)\
 identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=30)
 
 
-key = oneOf("default min_length max_length min max help_text label visible odd even choices")\
+key = oneOf("default min_length max_length min max help_text label hidden odd even choices")\
     .setResultsName("property_name")
 value = (real | integer | boolean | string | lst).setResultsName("property_value")
 field_property = Group(key + colon + value)

@@ -24,8 +24,8 @@ class TestParamField(TestCase):
         form = parsed.form()
         self.assertIsInstance(form, ParamInputForm)
 
-    def test_fk_support(self):
-        # TODO: Test against foreign key params when implemented
+    def test_file_support(self):
+        # TODO: Test against file params when implemented
         pf = ParamField(file_support=False)
         params = "number: Integer->default: 12"
         parsed = pf.clean(params, None)

@@ -32,8 +32,19 @@ class ParamDict(OrderedDict):
                 .format(name, str(param)) for name, param in self.items()])
 
     def form(self, *args, **kwargs):
+        """Return a form containig all parameters stored in ParamDict
+        Arguments:
+            *args and **kwargs: Are the arguments you would normally 
+            pass to a form
+        """
         # Imported here to avoid circular dependency
         from .forms import ParamInputForm
+        
+        # If there are no defined fields returns Nones instead of
+        # an empty form.
+        if len(self) == 0:
+            return None
+
         kwargs['params'] = self
         return ParamInputForm(*args, **kwargs)
 
@@ -163,14 +174,17 @@ class Param(object):
             raise ValueError("'{}' label too long".format(value))
         self.label = value
 
-    def _init_visible(self, value):
-        """Verify default value is provided when field is not visible"""
-        self.visible = value
-        
-        if self.visible:
-            pass
-        elif not hasattr(self, 'default') or self.default is None:
-            raise ValueError('A default value must be provided for invisible parameters')
+    def _init_hidden(self, value):
+        """Verify default value is provided when field hidden"""
+        self.hidden = value
+      
+        # No choices are needed when the user can't seet the field
+        if self.hidden and hasattr(self, 'choices'):
+            self.choices = None
+
+        # Default value required for hidden fields
+        if self.hidden and not hasattr(self, 'default') or self.default is None:
+            raise ValueError('A default value must be provided for hidden parameters')
 
     def _init_help_text(self, value):
         if len(value)>HELP_TEXT_MAX_LENGTH:
@@ -378,7 +392,7 @@ class BoolParam(Param):
         ('label', str, ''),
         ('help_text', str, ''),
         ('default', bool, None),
-        ('visible', bool, True)]
+        ('hidden', bool, False)]
 
 class IntegerParam(Param, NumberMixin):
     native_type = int
@@ -392,7 +406,7 @@ class IntegerParam(Param, NumberMixin):
         ('max', int, INT_MAX),
         ('choices', list, None),
         ('default', int, None),
-        ('visible', bool, True)]
+        ('hidden', bool, False)]
 
 class DecimalParam(Param, NumberMixin):
     native_type = Decimal
@@ -404,7 +418,7 @@ class DecimalParam(Param, NumberMixin):
         ('max', Decimal, REAL_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
-        ('visible', bool, True)]
+        ('hidden', bool, False)]
 
 class DimmensionParam(Param, NumberMixin):
     native_type = Decimal
@@ -416,7 +430,7 @@ class DimmensionParam(Param, NumberMixin):
         ('max', Decimal, REAL_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
-        ('visible', bool, True)]
+        ('hidden', bool, False)]
 
 class TextParam(Param, StringMixin):
     native_type = str
@@ -428,7 +442,7 @@ class TextParam(Param, StringMixin):
         ('max_length', int, STRING_MAX_LENGTH),
         ('choices', list, None),
         ('default', str, None),
-        ('visible', bool, True)]
+        ('hidden', bool, False)]
 
 class TextAreaParam(TextParam):
     type_name = 'TextArea'
@@ -445,9 +459,7 @@ class FileParam(Param, StringMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
-        ('choices', list, None),
-        ('default', str, None),
-        ('visible', bool, True)]
+        ('default', str, None)]
     #TODO: prep_value
     #model_class = 
     #model_field =
@@ -458,9 +470,7 @@ class ImageParam(Param, StringMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
-        ('choices', list, None),
-        ('default', str, None),
-        ('visible', bool, True)]
+        ('default', str, None)]
     #TODO: prep_value
     #model_class =
     #model_field =

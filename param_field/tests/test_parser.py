@@ -234,9 +234,9 @@ class TestParserBase(TestCase):
         with self.assertRaises(ParseException):
             parse_fields("number:Integer VALID:Bool")
         with self.assertRaises(ParseException):
-            parse_fields("number:Integer-> default:12 visible:Bool")
+            parse_fields("number:Integer-> default:12 hidden:Bool")
         with self.assertRaises(ParseException):
-            parse_fields("number:Integer a:Bool visible:33")
+            parse_fields("number:Integer a:Bool hidden:33")
         with self.assertRaises(ParseException):
             parse_fields("number:Integer a:Bool 2:DecimalParam")
     
@@ -247,7 +247,7 @@ class TestParserBase(TestCase):
         parse_fields('number:Integer->even:True odd:True')
         parse_fields('number:Integer->default:33 choices:[22, 33, 44]')
         parse_fields('number:Text->max_length:44 min_length:1')
-        parse_fields('activate:Bool->default:False visible:False')
+        parse_fields('activate:Bool->default:False hidden:False')
         parse_fields('name:Text->help_text:"adfasd" label:"text input"')
 
         # Test properties case sensitive.
@@ -339,8 +339,8 @@ class TestParserBase(TestCase):
         self.assertEqual(p['active'].label, "the real")
         self.assertEqual(p['active'].help_text, "helpy")
 
-        p = parse_fields('width:Dimmension-> default:12.1 visible:True')
-        self.assertEqual(p['width'].visible, True)
+        p = parse_fields('width:Dimmension-> default:12.1 hidden:True')
+        self.assertEqual(p['width'].hidden, True)
         self.assertEqual(p['width'].default, Decimal('12.1'))
 
     def test_properties_defaults(self):
