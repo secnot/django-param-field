@@ -3,10 +3,10 @@
 A Django model field that uses a DSL to define, generate, and validate, custom forms.
 
 After reading this [fantastic presentation](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-on how flexible can be a DSL to generate forms, I implemented  a django version of
-this idea so now the circle is complete.
+on how flexible a DSL can be to generate forms in comparison with Django, I have implemented a django version of this 
+idea so now the circle is complete.
 
-django-param-field provides a model field where you to write something like this:
+django-param-field provides a model field where you can store something like this:
 
 ```bash
 width: Dimmension-> max:50.0 min:5.0
@@ -15,7 +15,7 @@ painted : Bool-> default:False
 inscription: Text-> max_length:30
 ```
 
-to generate a django equivalent form.
+and generate the django equivalent form whenever you want it.
 
 
 ## Requirement
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 Add the field to your model:
 
 ```python
+# models.py
 from djang.db import models
 from param_field import ParamField, ParamDict
 
@@ -64,7 +65,7 @@ class CustomProduct(models.Model):
 	params = ParamField(blank=True, max_length=3000)
 ```
 
-Now that you have a working model create a new one, and add the
+Now that you have a working model create a new instance, with the
 parameters that it will accept:
 
 ```python
@@ -74,13 +75,14 @@ params = """
 
 CustomProduct.objects.create(
 	name='Custom wooden box",
-	parms=parms)
+	params=params)
 ```
 
 
-The formview handling this parameters, once it has retrieved the model,
+And the FormView that generates the forms from the model
 
 ```python
+# views.py
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import FormView
 from django import forms
@@ -92,7 +94,7 @@ class CustomProductFormView(FormView):
 
 	def dispatch(self, request, *args, **kwargs):
 		"""Find requested CustomProduct it's needed both in post and get 
-		request so the form can be genereted"""
+		requests so the form can be genereted"""
 		pk = self.kwargs['pk']
 		self.product = get_object_or_404(CustomProduct, pk=pk)
 		return super().dispatch(request, *args, **kwargs)
@@ -104,7 +106,7 @@ class CustomProductFormView(FormView):
         return context
 
 	def get_form(self, form_class=None):
-		"""Generate """
+		"""Generate form form param_field"""
 		return self.product.params.form(**self.get_form_kwargs())
 
 	def form_valid(self, form):
