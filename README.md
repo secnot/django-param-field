@@ -9,8 +9,8 @@ idea so now the circle is complete.
 django-param-field provides a model field where you can store something like this:
 
 ```bash
-width: Dimmension-> max:50.0 min:5.0
-height: Dimmension-> max:40.0 min:3.0
+width: Decimal -> max:50.0 min:5.0
+height: Decimal -> max:40.0 min:3.0
 painted : Bool-> default:False
 inscription: Text-> max_length:30
 ```
@@ -118,7 +118,7 @@ class CustomProductFormView(FormView):
 
 ## Syntax
 
-Each ParamField can have one or more fields with the followin syntax
+Each ParamField can have one or more fields with the following syntax
 
 ```bash
 fieldname: type-> property: value
@@ -127,7 +127,7 @@ fieldname: type-> property: value
 * **fieldname** - A lower case name including numbers and underscores,
 	it must start with a letter and has a max length of 30 characters.
 
-* **type** - One of the supported field types (All start with uppercase)    
+* **type** - One of the supported field types (All starting with uppercase)    
 	* Bool
 	* Decimal
 	* Dimmension
@@ -138,7 +138,7 @@ fieldname: type-> property: value
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
 
-* **Values** - One of the value types supported by the property to its left
+* **value** - One of the value types supported by the property to its left
 	* boolean - True/False
 	* Decimal - 1.33, 6.44
 	* Integer - 44
