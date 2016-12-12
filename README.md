@@ -8,7 +8,7 @@ this idea so now the circle is complete.
 
 django-param-field provides a model field where you to write something like this:
 
-```python
+```bash
 width: Dimmension-> max:50.0 min:5.0
 height: Dimmension-> max:40.0 min:3.0
 painted : Bool-> default:False
