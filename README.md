@@ -123,25 +123,27 @@ Each ParamField can have one or more fields with the followin syntax
 ```bash
 field_name: type-> (property: value)*
 ```
-	* field_name -> A lower case field_name including numbers and underscores,
-		it must start with a letter and has a max length of  30 characters.
-	* type -> One of the supported field types (All start with uppercase)    
-		Bool
-    	Decimal
-    	Dimmension
-    	Integer
-    	Text
-    	TextArea
 
-	* property-> One or more of the properties accepted by teh field type
-		followed by a value
+* field_name -> A lower case field_name including numbers and underscores,
+	it must start with a letter and has a max length of  30 characters.
 
-	* Values-> One of the value types supported by the property to its left
-		boolean-> True/False
-		Decimal-> 1.33, 6.44
-		Integer-> 44
-		String-> "with scape char \\" this "
-		Value list -> [1, 2, 3]
+* type -> One of the supported field types (All start with uppercase)    
+	Bool
+	Decimal
+	Dimmension
+	Integer
+	Text
+	TextArea
+
+* property-> One or more of the properties accepted by teh field type
+	followed by a value
+
+* Values-> One of the value types supported by the property to its left
+	boolean-> True/False
+	Decimal-> 1.33, 6.44
+	Integer-> 44
+	String-> "with scape char \\" this "
+	Value list -> [1, 2, 3]
 
 ## Testing
 
