@@ -835,15 +835,27 @@ class TestDimmensionParam(TestCase):
 
 
 
+class TestFileParam(TestCase):    
+    param = FileParam
 
+    def test_unsupported_properties(self):
+        with self.assertRaises(ValueError):
+            self.param(max=12)
+        with self.assertRaises(ValueError):
+            self.param(min=10)
+        with self.assertRaises(ValueError):
+            self.param(odd=True)
+        with self.assertRaises(ValueError):
+            self.param(even=True)
+        with self.assertRaises(ValueError):
+            self.param(hidden=True)
+        with self.assertRaises(ValueError):
+            self.param(max_length=12)
+        with self.assertRaises(ValueError):
+            self.param(default=12)
 
-
-
-
-
-
-
-
-
+    def test_is_valid(self):
+        p = TextParam(required=True)
+        self.assertTrue(p.is_valid("fasd"))
 
 

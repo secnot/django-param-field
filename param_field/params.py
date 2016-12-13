@@ -19,7 +19,7 @@ class ParamDict(OrderedDict):
 
         self._original_source = fields
 
-        f = parse_fields(fields or '', file_support=False)
+        f = parse_fields(fields or '', file_support)
         for name, field in f.items():
             self[name] = field
 
@@ -144,6 +144,7 @@ class Param(object):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('choices', list, None),
         ('default', str, '')] 
     
@@ -183,7 +184,7 @@ class Param(object):
             self.choices = None
 
         # Default value required for hidden fields
-        if self.hidden and not hasattr(self, 'default') or self.default is None:
+        if self.hidden and (not hasattr(self, 'default') or self.default is None):
             raise ValueError('A default value must be provided for hidden parameters')
 
     def _init_help_text(self, value):
@@ -391,6 +392,7 @@ class BoolParam(Param):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('default', bool, None),
         ('hidden', bool, False)]
 
@@ -400,6 +402,7 @@ class IntegerParam(Param, NumberMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('even', bool, False),
         ('odd', bool, False),
         ('min', int, INT_MIN),
@@ -414,6 +417,7 @@ class DecimalParam(Param, NumberMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('min', Decimal, REAL_MIN),
         ('max', Decimal, REAL_MAX),
         ('choices', list, None),
@@ -426,6 +430,7 @@ class DimmensionParam(Param, NumberMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('min', Decimal, Decimal('0.0')),
         ('max', Decimal, REAL_MAX),
         ('choices', list, None),
@@ -438,6 +443,7 @@ class TextParam(Param, StringMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('min_length', int, 0),
         ('max_length', int, STRING_MAX_LENGTH),
         ('choices', list, None),
@@ -459,7 +465,7 @@ class FileParam(Param, StringMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
-        ('default', str, None)]
+        ('required', bool, True)]
     #TODO: prep_value
     #model_class = 
     #model_field =
@@ -470,7 +476,7 @@ class ImageParam(Param, StringMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
-        ('default', str, None)]
+        ('required', bool, True)]
     #TODO: prep_value
     #model_class =
     #model_field =

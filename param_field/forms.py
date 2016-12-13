@@ -34,7 +34,14 @@ def expand_name(name):
 
 
 def FileFieldFactory(param, name):
-    """Form field factory for all File fields"""
+    """Form field factory for all File fields"""    
+    field_args = {
+        'help_text': param.help_text or None,
+        'label': param.label or expand_name(name),
+        'required': param.required,}
+
+    return FORM_FIELD_CLASS[type(param)](**field_args)
+
     raise NotImplementedError
 
 
@@ -45,7 +52,7 @@ def StdFieldFactory(param, name):
         'help_text': param.help_text or None,
         'label': param.label or expand_name(name),
         'initial': param.default,
-        'required': param.default is None,
+        'required': param.required,
         'validators': [ParamFormFieldValidator(param),]}
 
     # Change widget for hidden fields
