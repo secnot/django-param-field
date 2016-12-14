@@ -42,8 +42,6 @@ def FileFieldFactory(param, name):
 
     return FORM_FIELD_CLASS[type(param)](**field_args)
 
-    raise NotImplementedError
-
 
 def StdFieldFactory(param, name):
     """Form field  factory for fields using standard fields, that is:
@@ -84,11 +82,10 @@ class ParamInputForm(forms.Form):
     be used to validate inputs
    
     Arguments:
-        - params: ParamDict
+        - params (ParamDict): Containing form fields
 
     Examples: 
         https://jacobian.org/writing/dynamic-form-generation/
-        http://stackoverflow.com/questions/5871730/need-a-minimal-django-file-upload-example
     """
     def __init__(self, *args, **kwargs):
         """
@@ -96,18 +93,6 @@ class ParamInputForm(forms.Form):
         self._params = kwargs.pop('params')
         super(ParamInputForm, self).__init__(*args, **kwargs)
        
-        # Add all visible fields from ParamDict to the form
+        # Add all fields from ParamDict to the form
         for name, param in self._params.items():
             self.fields[name] = ParamFieldFactory(param, name)
-
-    def clean(self):
-        # When a form's non-string and non-required field is not supplied by
-        # the user, None is asigned by default. Here all those fields are 
-        # removed after validation so the default value for the parameter
-        # is used by PartGenerator.
-        cd = dict((k, v) for k, v in self.cleaned_data.items() if v is not None) 
-        return self.cleaned_data
-        self.cleaned_data = cd
-        return self.cleaned_data
-
-

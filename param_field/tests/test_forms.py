@@ -6,6 +6,8 @@ from param_field.params import ParamDict
 from param_field.forms import ParamInputForm
 from param_field.params import *
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from decimal import Decimal
 
 
@@ -196,7 +198,27 @@ class TestParamInputForm(TestCase):
         d = ParamDict('name: Bool->required: False')
         form = ParamInputForm(params=d, data={})
         self.assertTrue(form.is_valid())
+       
+        # Files
+        d = ParamDict("a_file: File", file_support=True)
+        form = ParamInputForm(params= d, data={})
+        self.assertFalse(form.is_valid())
         
+        d = ParamDict("a_file: File -> required:False", file_support=True)
+        form = ParamInputForm(params= d, data={})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict('a_file: File-> required:True', file_support=True)
+        form = ParamInputForm(params=d, data ={}, files = {
+            'a_file': SimpleUploadedFile('the_file.txt', b"and the content")})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict('a_file: File-> required:False', file_support=True)
+        form = ParamInputForm(params=d, data ={}, files = {
+            'a_file': SimpleUploadedFile('the_file.txt', b"and the content")})
+        self.assertTrue(form.is_valid())
+
+
 
     def test_hidden_params(self):
         """Test invisible params are not present in the form"""
@@ -291,3 +313,24 @@ class TestParamInputForm(TestCase):
             form = ParamInputForm(params=d, data={'width': s})
             self.assertFalse(form.is_valid())
 
+    def test_default_present(self):
+        """Test default value is present in the rendered form"""
+        d = ParamDict('width: Decimal->default: 77.66')
+        form = ParamInputForm(params=d)
+        self.assertTrue('77.66' in form.as_p())
+        
+        d = ParamDict('width: Integer->default: 7')
+        form = ParamInputForm(params=d)
+        self.assertTrue('7' in form.as_p()) 
+        
+        d = ParamDict('width: Text->default: "just a string"')
+        form = ParamInputForm(params=d)
+        self.assertTrue('just a string' in form.as_p())
+
+        d = ParamDict('width: Bool->default: True')
+        form = ParamInputForm(params=d)
+        self.assertTrue('checked' in form.as_p())
+        
+        d = ParamDict('width: Bool->default: False')
+        form = ParamInputForm(params=d)
+        self.assertFalse('checked' in form.as_p())

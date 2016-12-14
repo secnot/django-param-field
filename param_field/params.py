@@ -461,9 +461,7 @@ class TextAreaParam(TextParam):
     #TODO: Custom widget
 
 
-#TODO: Support and test File Params
-#
-# 
+# File Params
 class FileParam(Param, StringMixin):
     native_type = str
     type_name = 'File'
@@ -471,19 +469,13 @@ class FileParam(Param, StringMixin):
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True)]
-    #TODO: prep_value
-    #model_class = 
-    #model_field =
 
-class ImageParam(Param, StringMixin):
+class ImageParam(FileParam):
     native_type = str
     type_name = 'Image'
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True)]
-    #TODO: prep_value
-    #model_class =
-    #model_field =
 
 

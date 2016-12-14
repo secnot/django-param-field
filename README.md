@@ -17,6 +17,15 @@ inscription: Text-> max_length:30
 
 and generate the django equivalent form whenever you want it.
 
+```python
+from django import forms
+
+class CustomForm(forms.Form):
+	width = forms.DecimalField(max_value=50, min=5)
+	height = forms.DecimalField(max_valur=40, min=3)
+	painted = forms.BooleanField()
+	inscription = forms.CharField(max_length=30)
+```	
 
 ## Requirement
 
@@ -114,7 +123,7 @@ class CustomProductFormView(FormView):
 	def form_valid(self, form):
 		"""Do what ever you want with the form, at this point it's a
 		validated django form like any other"""
-		custom_parameters = form.cleaned_data.copy()
+		custom_parameters = form.cleaned_data
 		...
 ```
 
@@ -153,7 +162,7 @@ fieldname: type-> property: value
 	* Decimal - 1.33, 6.44
 	* Integer - 44
 	* String - "string with scape \\"chars\\" "
-	* Value list - [1, 2, 3]
+	* Value list - [value, value, value]
 
 ## Testing
 
@@ -165,5 +174,4 @@ $ python manage.py test param_field
 
 ## TODO
 
-* Add FileField Support
 * Better parser error messages
