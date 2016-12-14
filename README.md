@@ -143,6 +143,8 @@ fieldname: type-> property: value
 	* Integer
 	* Text
 	* TextArea
+	* File
+	* Image
 
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
