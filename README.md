@@ -11,7 +11,7 @@ painted : Bool-> default:False
 inscription: Text-> max_length:30
 ```
 
-and generate the django equivalent form whenever you want it.
+and generate the django equivalent form as needed:
 
 ```python
 from django import forms
@@ -170,6 +170,12 @@ Once the app has been added to settings.py, you can run the tests with:
 $ python manage.py test param_field
 ```
 
+## References
+
+* [Domain speficific languages python slide](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
+* [Small django-param-field HowTo](http://www.secnot.com/django-param-field-en.html)
+
 ## TODO
 
 * Better parser error messages
+
