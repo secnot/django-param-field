@@ -179,4 +179,5 @@ README
 ## TODO
 
 * Better parser error messages
+* Better settings managment into settigs.py
 
