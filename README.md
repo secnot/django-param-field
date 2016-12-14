@@ -173,7 +173,8 @@ $ python manage.py test param_field
 ## References
 
 * [Domain speficific languages python slide](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-* [Small django-param-field HowTo](http://www.secnot.com/django-param-field-en.html)
+* [Small django-param-field tutorial](http://www.secnot.com/django-param-field-en.html) with a longer example than the
+README
 
 ## TODO
 
