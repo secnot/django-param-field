@@ -145,7 +145,6 @@ class TestParamDict(TestCase):
         form = d.form()
         self.assertEqual(form, None)
 
-    
 
 
 class TestBaseParam(TestCase):

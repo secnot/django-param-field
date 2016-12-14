@@ -57,8 +57,6 @@ class ParamDict(OrderedDict):
 
     def serialize(self, request):
         """Convert each value to its representation so it can be easily stored
-        for example a foreign key object will be converted to its string value
-        or to its slug.
 
         Argumens:
             request (dictionary): value for each parameter.

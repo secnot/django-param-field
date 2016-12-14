@@ -229,7 +229,9 @@ class TestParserBase(TestCase):
         with self.assertRaises(Exception):
             parse_fields('width: Decimal->default:33e2')
 
-
+        with self.assertRaises(Exception):
+            parse_fields('width: Decimal->default:33')
+        
         # max/min limits   
         p = parse_fields('width: Decimal->default:999999.9999')
         self.assertEqual(p['width'].default, Decimal('999999.9999'))

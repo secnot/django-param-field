@@ -65,7 +65,7 @@ class ParamField(models.TextField):
 
     def formfield(self, **kwargs):
         """So validation can be added"""
-        defaults = {'validators': [ParamValidator(),]}
+        defaults = {'validators': [ParamValidator(self._file_support),]}
         defaults.update(kwargs)
         return super(ParamField, self).formfield(**defaults)
 
