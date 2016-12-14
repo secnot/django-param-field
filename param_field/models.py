@@ -39,9 +39,11 @@ class ParamField(models.TextField):
         try:
             return ParamDict(value, self._file_support)
         except ParseBaseException as err:
-            raise ValidationError(str(err))
+            # Couldn't parse form definition return empty one
+            return ParamDict(value, self._file_support, parse=False)
         except ValueError as err:
-            raise ValidationError(str(err))
+            # Couldn't parse form definition return empty one
+            return ParamDict(value, self._file_support, parse=False)
 
     def get_prep_value(self, value):
         """Convert objects to string"""

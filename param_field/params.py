@@ -9,17 +9,24 @@ from .limits import *
 
 class ParamDict(OrderedDict):
   
-    def __init__(self, fields='', file_support=False):
+    def __init__(self, fields='', file_support=False, parse=True):
         """
         Arguments:
             fields (str): String containig fields definitions.
+            file_support(book): 
+            parse(bool): If True parse field string, else just store
+                original string and return empy ParamDict
         """
         from .parser import parse_fields # Solve circular import
         super(ParamDict, self).__init__()
 
         self._original_source = fields
 
-        f = parse_fields(fields or '', file_support)
+        if parse:
+            f = parse_fields(fields or '', file_support)
+        else:
+            f = {}
+
         for name, field in f.items():
             self[name] = field
 
