@@ -26,7 +26,18 @@ class TestParserBase(TestCase):
         parse_fields("width2:Integer")
         parse_fields("width3:Decimal")
         parse_fields("width4:Text")
-        parse_fields("width5:Bool")
+        parse_fields("widht5:TextArea")
+        parse_fields("width6:Bool")
+
+        parse_fields("width7:File", file_support=True)
+        parse_fields("width8:Image", file_support=True)
+       
+        # Test file_support must be enabled for File and Image
+        with self.assertRaises(ParseException):
+            parse_fields("width: File")
+
+        with self.assertRaises(ParseException):
+            parse_fields("widht: Image")
 
         # Test unknown type
         with self.assertRaises(ParseException):
@@ -42,7 +53,13 @@ class TestParserBase(TestCase):
         with self.assertRaises(ParseException):
             parse_fields("width:text")
         with self.assertRaises(ParseException):
+            parse_fields("width:textarea")
+        with self.assertRaises(ParseException):
             parse_fields("width:bool")
+        with self.assertRaises(ParseException):
+            parse_fields("width:file", file_support=True)
+        with self.assertRaises(ParseException):
+            parse_fields("width:image", file_support=True)
 
     def test_correct_param_used(self):
         """Test correct param object is used for each type"""
@@ -56,6 +73,10 @@ class TestParserBase(TestCase):
         self.assertIsInstance(d['para'], TextParam)
         d = parse_fields('para: Bool')
         self.assertIsInstance(d['para'], BoolParam)
+        d = parse_fields('para: File', file_support=True)
+        self.assertIsInstance(d['para'], FileParam)
+        d = parse_fields('para: Image', file_support=True)
+        self.assertIsInstance(d['para'], ImageParam)
  
     def test_valid_names(self):
         
@@ -208,7 +229,9 @@ class TestParserBase(TestCase):
         with self.assertRaises(Exception):
             parse_fields('width: Decimal->default:33e2')
 
-
+        with self.assertRaises(Exception):
+            parse_fields('width: Decimal->default:33')
+        
         # max/min limits   
         p = parse_fields('width: Decimal->default:999999.9999')
         self.assertEqual(p['width'].default, Decimal('999999.9999'))
@@ -243,12 +266,12 @@ class TestParserBase(TestCase):
     def test_allowed_properties(self):
     
         # Test valid properties with correct parameter and value type.
-        parse_fields('number:Integer->max:12 min:1 default:5')
-        parse_fields('number:Integer->even:True odd:True')
-        parse_fields('number:Integer->default:33 choices:[22, 33, 44]')
-        parse_fields('number:Text->max_length:44 min_length:1')
-        parse_fields('activate:Bool->default:False hidden:False')
-        parse_fields('name:Text->help_text:"adfasd" label:"text input"')
+        parse_fields('number:Integer->max:12 min:1 default:5 required:True hidden:True')
+        parse_fields('number:Integer->even:True odd:True required:False hidden:False')
+        parse_fields('number:Integer->default:33 choices:[22, 33, 44] required:False hidden:True')
+        parse_fields('number:Text->max_length:44 min_length:1 required:False')
+        parse_fields('activate:Bool->default:False hidden:False required:True')
+        parse_fields('name:Text->help_text:"adfasd" label:"text input" required:False')
 
         # Test properties case sensitive.
         with self.assertRaises(ParseException):
@@ -313,14 +336,16 @@ class TestParserBase(TestCase):
 
     def test_properties_initialized(self):
         """Test properties are passed to param __init__ and initialized"""
-        p = parse_fields('number:Integer->max:12 min:1 default:5')
+        p = parse_fields('number:Integer->max:12 min:1 default:5 hidden:True')
         self.assertEqual(p['number'].max, 12)
         self.assertEqual(p['number'].min, 1)
         self.assertEqual(p['number'].default, 5)
+        self.assertEqual(p['number'].hidden, True)
 
-        p = parse_fields('number:Integer->even:True odd:True')
+        p = parse_fields('number:Integer->even:True odd:True required:False')
         self.assertEqual(p['number'].even, True)
         self.assertEqual(p['number'].odd, True)
+        self.assertEqual(p['number'].required, False)
 
         p = parse_fields('number:Integer->choices:[3, 4, 5, 6]')
         self.assertEqual(p['number'].choices[0], 3)
@@ -343,12 +368,17 @@ class TestParserBase(TestCase):
         self.assertEqual(p['width'].hidden, True)
         self.assertEqual(p['width'].default, Decimal('12.1'))
 
+        p = parse_fields('custom_file:File-> required:False', file_support=True)
+        self.assertEqual(p['custom_file'].required, False)
+
     def test_properties_defaults(self):
         """Test properties default values"""
         p = parse_fields('par:Bool')
         self.assertEqual(p['par'].label, '')
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
+        self.assertEqual(p['par'].hidden, False)
+        self.assertEqual(p['par'].required, True)
 
         p = parse_fields('par:Text')
         self.assertEqual(p['par'].label, '')
@@ -357,6 +387,8 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].choices, None)
         self.assertEqual(p['par'].max_length, STRING_MAX_LENGTH)
         self.assertEqual(p['par'].min_length, 0)
+        self.assertEqual(p['par'].hidden, False)
+        self.assertEqual(p['par'].required, True)
 
         p = parse_fields('par:Integer')
         self.assertEqual(p['par'].label, '')
@@ -366,16 +398,20 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].max, INT_MAX)
         self.assertEqual(p['par'].min, INT_MIN)
         self.assertEqual(p['par'].even, False)
-        self.assertEqual(p['par'].odd, False)
-        
+        self.assertEqual(p['par'].odd, False) 
+        self.assertEqual(p['par'].hidden, False)
+        self.assertEqual(p['par'].required, True)
+
         p = parse_fields('par:Decimal')
         self.assertEqual(p['par'].label, '')
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
         self.assertEqual(p['par'].max, REAL_MAX)
-        self.assertEqual(p['par'].min, REAL_MIN) 
-        
+        self.assertEqual(p['par'].min, REAL_MIN)  
+        self.assertEqual(p['par'].hidden, False)
+        self.assertEqual(p['par'].required, True)
+
         p = parse_fields('par:Dimmension')
         self.assertEqual(p['par'].label, '')
         self.assertEqual(p['par'].help_text, '')
@@ -383,3 +419,15 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].choices, None)
         self.assertEqual(p['par'].max, REAL_MAX)
         self.assertEqual(p['par'].min, Decimal('0.0'))
+        self.assertEqual(p['par'].hidden, False)
+        self.assertEqual(p['par'].required, True)
+        
+        p = parse_fields('par:File', file_support=True)
+        self.assertEqual(p['par'].label, '')
+        self.assertEqual(p['par'].help_text, '')
+        self.assertEqual(p['par'].required, True)
+
+        p = parse_fields('par:Image', file_support=True)
+        self.assertEqual(p['par'].label, '')
+        self.assertEqual(p['par'].help_text, '')
+        self.assertEqual(p['par'].required, True)

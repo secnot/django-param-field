@@ -9,17 +9,24 @@ from .limits import *
 
 class ParamDict(OrderedDict):
   
-    def __init__(self, fields='', file_support=False):
+    def __init__(self, fields='', file_support=False, parse=True):
         """
         Arguments:
             fields (str): String containig fields definitions.
+            file_support(book): 
+            parse(bool): If True parse field string, else just store
+                original string and return empy ParamDict
         """
         from .parser import parse_fields # Solve circular import
         super(ParamDict, self).__init__()
 
         self._original_source = fields
 
-        f = parse_fields(fields or '', file_support=False)
+        if parse:
+            f = parse_fields(fields or '', file_support)
+        else:
+            f = {}
+
         for name, field in f.items():
             self[name] = field
 
@@ -50,8 +57,6 @@ class ParamDict(OrderedDict):
 
     def serialize(self, request):
         """Convert each value to its representation so it can be easily stored
-        for example a foreign key object will be converted to its string value
-        or to its slug.
 
         Argumens:
             request (dictionary): value for each parameter.
@@ -144,6 +149,7 @@ class Param(object):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('choices', list, None),
         ('default', str, '')] 
     
@@ -183,7 +189,7 @@ class Param(object):
             self.choices = None
 
         # Default value required for hidden fields
-        if self.hidden and not hasattr(self, 'default') or self.default is None:
+        if self.hidden and (not hasattr(self, 'default') or self.default is None):
             raise ValueError('A default value must be provided for hidden parameters')
 
     def _init_help_text(self, value):
@@ -391,6 +397,7 @@ class BoolParam(Param):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('default', bool, None),
         ('hidden', bool, False)]
 
@@ -400,6 +407,7 @@ class IntegerParam(Param, NumberMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('even', bool, False),
         ('odd', bool, False),
         ('min', int, INT_MIN),
@@ -414,6 +422,7 @@ class DecimalParam(Param, NumberMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('min', Decimal, REAL_MIN),
         ('max', Decimal, REAL_MAX),
         ('choices', list, None),
@@ -426,6 +435,7 @@ class DimmensionParam(Param, NumberMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('min', Decimal, Decimal('0.0')),
         ('max', Decimal, REAL_MAX),
         ('choices', list, None),
@@ -438,6 +448,7 @@ class TextParam(Param, StringMixin):
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
+        ('required', bool, True),
         ('min_length', int, 0),
         ('max_length', int, STRING_MAX_LENGTH),
         ('choices', list, None),
@@ -450,29 +461,21 @@ class TextAreaParam(TextParam):
     #TODO: Custom widget
 
 
-#TODO: Support and test File Params
-#
-# 
+# File Params
 class FileParam(Param, StringMixin):
     native_type = str
     type_name = 'File'
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
-        ('default', str, None)]
-    #TODO: prep_value
-    #model_class = 
-    #model_field =
+        ('required', bool, True)]
 
-class ImageParam(Param, StringMixin):
+class ImageParam(FileParam):
     native_type = str
     type_name = 'Image'
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
-        ('default', str, None)]
-    #TODO: prep_value
-    #model_class =
-    #model_field =
+        ('required', bool, True)]
 
 

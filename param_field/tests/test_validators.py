@@ -5,6 +5,7 @@ from param_field.validators import ParamValidator
 class TestParamValidator(TestCase):
 
     def test_validator(self):
+        """Test validator without file support"""
         validator = ParamValidator()
 
         # Control group
@@ -29,6 +30,22 @@ class TestParamValidator(TestCase):
         with self.assertRaises(ValidationError):
             validator(input_str)
 
-    def test_fk_support_disabled(self):
-        # TODO: No FK support yet
-        pass
+        # files not supported
+        input_str = "upload: File"
+        with self.assertRaises(ValidationError):
+            validator(input_str)
+
+    def test_file_validator(self):
+        """Test validator with file support"""
+        validator = ParamValidator(file_support=True)
+
+        # files supported
+        input_str = """
+            upload: File
+            enable: Bool"""
+        validator(input_str)
+
+        # Invalid control input
+        input_str = "asdfasdf: Float"
+        with self.assertRaises(ValidationError):
+            validator(input_str)

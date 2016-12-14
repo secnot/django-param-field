@@ -2,11 +2,7 @@
 
 A Django model field that uses a DSL to define, generate, and validate, custom forms.
 
-After reading this [fantastic presentation](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-on how flexible a DSL can be to generate forms in comparison with Django, I have implemented a django version of this 
-idea so now the circle is complete.
-
-django-param-field provides a model field where you can store something like this:
+**ParamField** allows you to store something like this:
 
 ```bash
 width: Decimal -> max:50.0 min:5.0
@@ -15,8 +11,19 @@ painted : Bool-> default:False
 inscription: Text-> max_length:30
 ```
 
-and generate the django equivalent form whenever you want it.
+and generate the django equivalent form as needed:
 
+```python
+from django import forms
+
+class CustomForm(forms.Form):
+	width = forms.DecimalField(max_value=50, min=5)
+	height = forms.DecimalField(max_valur=40, min=3)
+	painted = forms.BooleanField()
+	inscription = forms.CharField(max_length=30)
+```	
+
+This is useful for creating user defined forms, or custom per models forms.
 
 ## Requirement
 
@@ -28,13 +35,14 @@ It has been tested on
 
 ## Installation
 
-For now:
+From the repository
 
 ```bash
+$ git clone https://github.com/secnot/django-param-field
 $ python setup.py install
 ```
 
-And pypi as soon as it is available
+or from pypi
 
 ```bash
 $ pip intall django-param-field
@@ -42,7 +50,7 @@ $ pip intall django-param-field
 
 ## Usage
 
-Add the param_field to INSTALLED_APPS
+Add param_field to INSTALLED_APPS
 
 ```python
 # settings.py
@@ -65,8 +73,7 @@ class CustomProduct(models.Model):
 	params = ParamField(blank=True, max_length=3000)
 ```
 
-Now that you have a working model create a new instance, with the
-parameters that it will accept:
+Now that you have a working model to create a new instance with its parameters write:
 
 ```python
 params = """
@@ -114,7 +121,7 @@ class CustomProductFormView(FormView):
 	def form_valid(self, form):
 		"""Do what ever you want with the form, at this point it's a
 		validated django form like any other"""
-		custom_parameters = form.cleaned_data.copy()
+		custom_parameters = form.cleaned_data
 		...
 ```
 
@@ -139,23 +146,38 @@ fieldname: type-> property: value
 
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
+	* ALL: hidden required label help_text
+	* Bool: default
+	* Integer: default even odd max min choices
+	* Decimal: default max min choices
+	* Text: default max_length min_length choices
+	* TextArea: default max_length
+	* File: (doesn't support hidden)
+	* Image: (doesn't support hidden) 
 
 * **value** - One of the value types supported by the property to its left
 	* Boolean - True/False
 	* Decimal - 1.33, 6.44
 	* Integer - 44
 	* String - "string with scape \\"chars\\" "
-	* Value list - [1, 2, 3]
+	* Value list - [value, value, value]
 
 ## Testing
 
 Once the app has been added to settings.py, you can run the tests with:
 
 ```bash
-$ python manage.py test paramfield
+$ python manage.py test param_field
 ```
+
+## References
+
+* [Domain speficific languages python slide](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
+* [Small django-param-field tutorial](http://www.secnot.com/django-param-field-en.html) with a longer example than the
+README
 
 ## TODO
 
-* Add FileField Support
 * Better parser error messages
+* Better settings managment into settigs.py
+

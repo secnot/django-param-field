@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name='django-param-field',
-	version='0.2',
+	version='0.3',
 	description='A Django model field that uses a DSL to define, generate, and validate, custom forms',
 	url='https://github.com/secnot/django-param-field',
 	author='secnot',

@@ -6,6 +6,8 @@ from param_field.params import ParamDict
 from param_field.forms import ParamInputForm
 from param_field.params import *
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from decimal import Decimal
 
 
@@ -112,26 +114,46 @@ class TestParamInputForm(TestCase):
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
         
-        d = ParamDict("number:Integer->default:12")
+        d = ParamDict("number:Integer->default:12 required:False")
         form = ParamInputForm(params=d, data={})
         self.assertTrue(form.is_valid())
 
+        d = ParamDict("number:Integer->required:False")
+        form = ParamInputForm(params=d, data={})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict("number:Integer->required:True")
+        form = ParamInputForm(params=d, data={'number': 12})
+        self.assertTrue(form.is_valid())
+        
         # Decimal
         d = ParamDict("number:Decimal")
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict("number:Decimal->default:13.2")
+        d = ParamDict("number:Decimal->required:False")
         form = ParamInputForm(params=d, data={})
+        self.assertTrue(form.is_valid())
+ 
+        d = ParamDict("number:Decimal->required:False")
+        form = ParamInputForm(params=d, data={'number': '44'})
         self.assertTrue(form.is_valid())
 
         # Dimmension
-        d = ParamDict("number:Dimmension")
+        d = ParamDict("number:Dimmension-> default:23.3")
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict("number:Dimmension->default:13.2")
+        d = ParamDict("number:Dimmension->default:13.2 required:False")
         form = ParamInputForm(params=d, data={})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict("number:Dimmension->default:13.2 required:False")
+        form = ParamInputForm(params=d, data={'number': '2'})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict("number:Dimmension->default:23.3")
+        form = ParamInputForm(params=d, data={'number': '2'})
         self.assertTrue(form.is_valid())
 
         # Text
@@ -139,18 +161,64 @@ class TestParamInputForm(TestCase):
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict('name: Text->default:"2asdf"')
-        form = ParamInputForm(params=d, data={})
+        d = ParamDict('name: Text->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict('name: Text->required: False default:"2asdf"')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
         self.assertTrue(form.is_valid())
 
-        # TextArea
+        d = ParamDict('name: Text->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+        
+        # TextArea   
         d = ParamDict("name: TextArea")
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict('name: TextArea->default:"2asdf"')
+        d = ParamDict('name: TextArea->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict('name: TextArea->required: False default:"2asdf"')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict('name: TextArea->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+
+        # Bool
+        d = ParamDict("name: Bool")
+        form = ParamInputForm(params=d, data={})
+        self.assertFalse(form.is_valid())
+
+        d = ParamDict('name: Bool->required: False')
         form = ParamInputForm(params=d, data={})
         self.assertTrue(form.is_valid())
+       
+        # Files
+        d = ParamDict("a_file: File", file_support=True)
+        form = ParamInputForm(params= d, data={})
+        self.assertFalse(form.is_valid())
+        
+        d = ParamDict("a_file: File -> required:False", file_support=True)
+        form = ParamInputForm(params= d, data={})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict('a_file: File-> required:True', file_support=True)
+        form = ParamInputForm(params=d, data ={}, files = {
+            'a_file': SimpleUploadedFile('the_file.txt', b"and the content")})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict('a_file: File-> required:False', file_support=True)
+        form = ParamInputForm(params=d, data ={}, files = {
+            'a_file': SimpleUploadedFile('the_file.txt', b"and the content")})
+        self.assertTrue(form.is_valid())
+
+
 
     def test_hidden_params(self):
         """Test invisible params are not present in the form"""
@@ -245,4 +313,24 @@ class TestParamInputForm(TestCase):
             form = ParamInputForm(params=d, data={'width': s})
             self.assertFalse(form.is_valid())
 
+    def test_default_present(self):
+        """Test default value is present in the rendered form"""
+        d = ParamDict('width: Decimal->default: 77.66')
+        form = ParamInputForm(params=d)
+        self.assertTrue('77.66' in form.as_p())
+        
+        d = ParamDict('width: Integer->default: 7')
+        form = ParamInputForm(params=d)
+        self.assertTrue('7' in form.as_p()) 
+        
+        d = ParamDict('width: Text->default: "just a string"')
+        form = ParamInputForm(params=d)
+        self.assertTrue('just a string' in form.as_p())
 
+        d = ParamDict('width: Bool->default: True')
+        form = ParamInputForm(params=d)
+        self.assertTrue('checked' in form.as_p())
+        
+        d = ParamDict('width: Bool->default: False')
+        form = ParamInputForm(params=d)
+        self.assertFalse('checked' in form.as_p())

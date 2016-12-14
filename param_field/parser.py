@@ -10,13 +10,18 @@ FIELD_TO_PARAM = {
     'Integer': IntegerParam,
     'Text': TextParam,
     'TextArea': TextAreaParam,
+    'File': FileParam,
+    'Image': ImageParam,
 }
 
 
 reserved_keywords = Keyword("Integer")|Keyword("Bool")|Keyword("Dimmension")\
-        |Keyword("Decimal")|Keyword("Text")|Keyword("default")|Keyword("min_length")\
-        |Keyword("max_length")|Keyword("min")|Keyword("max")|Keyword("help_text")\
-        |Keyword("label")|Keyword("hidden")|Keyword("odd")|Keyword("even")|Keyword("choices")
+        |Keyword("Decimal")|Keyword("Text")|Keyword("TextArea")|Keyword("File")\
+        |Keyword("Image")|Keyword("default")|Keyword("min_length")|Keyword("max_length")\
+        |Keyword("min")|Keyword("max")|Keyword("help_text")|Keyword("label")\
+        |Keyword("hidden")|Keyword("odd")|Keyword("even")|Keyword("choices")\
+        |Keyword("required")
+
 cvtInt = lambda t: int(t[0])
 cvtDec = lambda t: Decimal(t[0])
 cvtBool = lambda t: (True if t[0]=="True" else False)
@@ -105,7 +110,7 @@ lst = Group(lbrack+lst_elem+ZeroOrMore(comma+lst_elem)+Optional(comma)+rbrack)\
 identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=30)
 
 
-key = oneOf("default min_length max_length min max help_text label hidden odd even choices")\
+key = oneOf("default min_length max_length min max help_text label hidden odd even choices required")\
     .setResultsName("property_name")
 value = (real | integer | boolean | string | lst).setResultsName("property_value")
 field_property = Group(key + colon + value)
@@ -135,7 +140,7 @@ params = create_parser(
         types = "Integer Dimmension Decimal Bool Text TextArea")
 
 params_file = create_parser(
-        types = "Integer Dimmension Decimal Bool Text TextArea")
+        types = "Integer Dimmension Decimal Bool Text TextArea File Image")
 
 params.enablePackrat()
 params_file.enablePackrat()
@@ -150,7 +155,6 @@ def parse_fields(input_str, file_support=False):
             Image
     """ 
     if file_support:
-        # TODO: File parameter support
         ast = params_file.parseString(input_str, parseAll=True)
     else:
         ast = params.parseString(input_str, parseAll=True)
