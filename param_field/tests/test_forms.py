@@ -112,26 +112,46 @@ class TestParamInputForm(TestCase):
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
         
-        d = ParamDict("number:Integer->default:12")
+        d = ParamDict("number:Integer->default:12 required:False")
         form = ParamInputForm(params=d, data={})
         self.assertTrue(form.is_valid())
 
+        d = ParamDict("number:Integer->required:False")
+        form = ParamInputForm(params=d, data={})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict("number:Integer->required:True")
+        form = ParamInputForm(params=d, data={'number': 12})
+        self.assertTrue(form.is_valid())
+        
         # Decimal
         d = ParamDict("number:Decimal")
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict("number:Decimal->default:13.2")
+        d = ParamDict("number:Decimal->required:False")
         form = ParamInputForm(params=d, data={})
+        self.assertTrue(form.is_valid())
+ 
+        d = ParamDict("number:Decimal->required:False")
+        form = ParamInputForm(params=d, data={'number': '44'})
         self.assertTrue(form.is_valid())
 
         # Dimmension
-        d = ParamDict("number:Dimmension")
+        d = ParamDict("number:Dimmension-> default:23.3")
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict("number:Dimmension->default:13.2")
+        d = ParamDict("number:Dimmension->default:13.2 required:False")
         form = ParamInputForm(params=d, data={})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict("number:Dimmension->default:13.2 required:False")
+        form = ParamInputForm(params=d, data={'number': '2'})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict("number:Dimmension->default:23.3")
+        form = ParamInputForm(params=d, data={'number': '2'})
         self.assertTrue(form.is_valid())
 
         # Text
@@ -139,18 +159,44 @@ class TestParamInputForm(TestCase):
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict('name: Text->default:"2asdf"')
-        form = ParamInputForm(params=d, data={})
+        d = ParamDict('name: Text->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict('name: Text->required: False default:"2asdf"')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
         self.assertTrue(form.is_valid())
 
-        # TextArea
+        d = ParamDict('name: Text->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+        
+        # TextArea   
         d = ParamDict("name: TextArea")
         form = ParamInputForm(params=d, data={})
         self.assertFalse(form.is_valid())
 
-        d = ParamDict('name: TextArea->default:"2asdf"')
+        d = ParamDict('name: TextArea->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+        
+        d = ParamDict('name: TextArea->required: False default:"2asdf"')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+
+        d = ParamDict('name: TextArea->required: False')
+        form = ParamInputForm(params=d, data={'text': 'some text'})
+        self.assertTrue(form.is_valid())
+
+        # Bool
+        d = ParamDict("name: Bool")
+        form = ParamInputForm(params=d, data={})
+        self.assertFalse(form.is_valid())
+
+        d = ParamDict('name: Bool->required: False')
         form = ParamInputForm(params=d, data={})
         self.assertTrue(form.is_valid())
+        
 
     def test_hidden_params(self):
         """Test invisible params are not present in the form"""
@@ -244,5 +290,4 @@ class TestParamInputForm(TestCase):
         for s in (Decimal('-23.4'), Decimal('14.3'), Decimal('55.4')):
             form = ParamInputForm(params=d, data={'width': s})
             self.assertFalse(form.is_valid())
-
 

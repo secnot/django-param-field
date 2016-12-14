@@ -139,14 +139,14 @@ fieldname: type-> property: value
 
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
-	* ALL: hidden default required label help_text
+	* ALL: hidden required label help_text
 	* Bool: default
-	* Integer: even odd max min choices
+	* Integer: default even odd max min choices
 	* Decimal: default max min choices
 	* Text: default max_length min_length choices
-	* TextArea: defaumax_length
-	* File: (doesn't support default or hidden)
-	* Image (doesn't support default or hidden) 
+	* TextArea: default max_length
+	* File: (doesn't support hidden)
+	* Image: (doesn't support hidden) 
 
 * **value** - One of the value types supported by the property to its left
 	* Boolean - True/False
