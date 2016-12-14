@@ -179,5 +179,5 @@ README
 ## TODO
 
 * Better parser error messages
-* Better settings managment into settigs.py
+* Better settings managment into settings.py
 
