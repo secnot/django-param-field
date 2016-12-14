@@ -2,7 +2,7 @@
 
 A Django model field that uses a DSL to define, generate, and validate, custom forms.
 
-django-param-field provides a model field **ParamField** where you can store something like this:
+**ParamField** allows you to store something like this:
 
 ```bash
 width: Decimal -> max:50.0 min:5.0
@@ -73,8 +73,7 @@ class CustomProduct(models.Model):
 	params = ParamField(blank=True, max_length=3000)
 ```
 
-Now that you have a working model to create a new instance with the
-parameters that it will accept:
+Now that you have a working model to create a new instance with its parameters write:
 
 ```python
 params = """
