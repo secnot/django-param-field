@@ -2,11 +2,7 @@
 
 A Django model field that uses a DSL to define, generate, and validate, custom forms.
 
-After reading this [fantastic presentation](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-on how flexible a DSL can be to generate forms in comparison with Django, I have implemented a django version of this 
-idea so now the circle is complete.
-
-django-param-field provides a model field where you can store something like this:
+django-param-field provides a model field **ParamField** where you can store something like this:
 
 ```bash
 width: Decimal -> max:50.0 min:5.0
@@ -27,6 +23,8 @@ class CustomForm(forms.Form):
 	inscription = forms.CharField(max_length=30)
 ```	
 
+This is useful for creating user defined forms, or custom per models forms.
+
 ## Requirement
 
 It has been tested on
@@ -37,13 +35,14 @@ It has been tested on
 
 ## Installation
 
-For now:
+From the repository
 
 ```bash
+$ git clone https://github.com/secnot/django-param-field
 $ python setup.py install
 ```
 
-And pypi as soon as it is available
+or from pypi
 
 ```bash
 $ pip intall django-param-field
@@ -51,7 +50,7 @@ $ pip intall django-param-field
 
 ## Usage
 
-Add the param_field to INSTALLED_APPS
+Add param_field to INSTALLED_APPS
 
 ```python
 # settings.py
@@ -74,7 +73,7 @@ class CustomProduct(models.Model):
 	params = ParamField(blank=True, max_length=3000)
 ```
 
-Now that you have a working model create a new instance, with the
+Now that you have a working model to create a new instance with the
 parameters that it will accept:
 
 ```python
