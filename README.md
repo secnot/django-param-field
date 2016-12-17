@@ -143,6 +143,8 @@ fieldname: type-> property: value
 	* Integer
 	* Text
 	* TextArea
+	* File
+	* Image
 
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
@@ -179,5 +181,5 @@ README
 ## TODO
 
 * Better parser error messages
-* Better settings managment into settigs.py
+* Better settings managment into settings.py
 
