@@ -1,9 +1,16 @@
 from decimal import Decimal
 
+# This are the absolute limits for all fields
+
 INT_MAX = 999999
 INT_MIN = -999999
-REAL_MAX = Decimal("999999.9999") 
-REAL_MIN = Decimal("-999999.9999")
+
+# Change DECIMAL to DECIMAL
+DECIMAL_MAX = Decimal("999999999999.9999") 
+DECIMAL_MIN = Decimal("-999999999999.9999")
+DECIMAL_MAX_DIGITS = 20
+DECIMAL_MAX_DECIMAL = 4
+
 STRING_MAX_LENGTH = 300
 LABEL_MAX_LENGTH = 40
 HELP_TEXT_MAX_LENGTH = 200
