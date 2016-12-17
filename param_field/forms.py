@@ -51,7 +51,7 @@ def StdFieldFactory(param, name):
         'label': param.label or expand_name(name),
         'initial': param.default,
         'required': param.required,
-        'validators': [ParamFormFieldValidator(param),]} # Use param own validator
+        'validators': [ParamFormFieldValidator(param),]} # Use param validator
 
     # Change widget for hidden fields
     if param.hidden or False:

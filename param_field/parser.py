@@ -78,6 +78,7 @@ def fieldToParam(token):
     name, field_type, props = token.field 
     return (name, FIELD_TO_PARAM[field_type](**props))
 
+
 lowercase = "abcdefghijklmnopqrstuvwxyz"
 lowercasenums = "abcdefghijklmnopqrstuvwxyz0123456789"
 arithOp = Word("+-*/^", max=1)

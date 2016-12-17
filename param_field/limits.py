@@ -5,7 +5,7 @@ from decimal import Decimal
 INT_MAX = 999999
 INT_MIN = -999999
 
-# Change DECIMAL to DECIMAL
+# Decimal 
 DECIMAL_MAX = Decimal("999999999999.9999") 
 DECIMAL_MIN = Decimal("-999999999999.9999")
 DECIMAL_MAX_DIGITS = 20

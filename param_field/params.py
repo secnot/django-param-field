@@ -487,7 +487,6 @@ class TextParam(Param, StringMixin):
 
 class TextAreaParam(TextParam):
     type_name = 'TextArea'
-    pass
     #TODO: Custom widget
 
 
