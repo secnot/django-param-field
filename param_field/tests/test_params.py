@@ -4,7 +4,8 @@ from unittest.mock import patch
 from param_field.params import *
 from param_field.forms import ParamInputForm
 
-from param_field.limits import (INT_MAX, INT_MIN, REAL_MAX, REAL_MIN,
+from param_field.limits import (INT_MAX, INT_MIN, DECIMAL_MAX, DECIMAL_MIN,
+        DECIMAL_MAX_DIGITS, DECIMAL_MAX_DECIMALS,
         STRING_MAX_LENGTH, LABEL_MAX_LENGTH, HELP_TEXT_MAX_LENGTH)
 
 
@@ -248,13 +249,13 @@ class TestBaseParam(TestCase):
         with self.assertRaises(ValueError):
             IntegerParam(default=INT_MIN-1)
 
-        DecimalParam(choices=[Decimal('12'), REAL_MAX])
+        DecimalParam(choices=[Decimal('12'), DECIMAL_MAX])
         with self.assertRaises(ValueError):
-            IntegerParam(choices=[Decimal('12'), REAL_MAX+1])
+            IntegerParam(choices=[Decimal('12'), DECIMAL_MAX+1])
 
-        DecimalParam(choices=[Decimal('12'), REAL_MIN])
+        DecimalParam(choices=[Decimal('12'), DECIMAL_MIN])
         with self.assertRaises(ValueError):
-            IntegerParam(choices=[Decimal('12'), REAL_MIN-1])
+            IntegerParam(choices=[Decimal('12'), DECIMAL_MIN-1])
 
         TextParam(default="a"*STRING_MAX_LENGTH)
         with self.assertRaises(ValueError):
@@ -461,6 +462,10 @@ class TestBoolParam(TestCase):
             BoolParam(max_length=30)
         with self.assertRaises(ValueError):
             BoolParam(min_length=1)
+        with self.assertRaises(ValueError):
+            BoolParam(max_digits=5)
+        with self.assertRaises(ValueError):
+            BoolParam(max_decimals=2)
 
     def test_is_valid(self):
         p = BoolParam(default=False)
@@ -540,6 +545,10 @@ class TestIntegerParam(TestCase):
             IntegerParam(max_length=12)
         with self.assertRaises(ValueError):
             IntegerParam(min_length=44)
+        with self.assertRaises(ValueError):
+            IntegerParam(max_digits=5)
+        with self.assertRaises(ValueError):
+            IntegerParam(max_decimals=2)
 
     def test_restrictions(self):
         """Test provided parameter restrictions are applied to
@@ -682,6 +691,12 @@ class TestDecimalParam(TestCase):
         with self.assertRaises(ValueError):
             DecimalParam(max=Decimal("12"), min=Decimal("13"))
 
+        # Max/min value has too many digits/decimals
+        with self.assertRaises(ValueError):
+            IntegerParam(max_digits=5, max=Decimal('999999'))
+        with self.assertRaises(ValueError):
+            IntegerParam(max_decimals=2, min=Decimal('44.999'))
+
         # Types
         with self.assertRaises(ValueError):
             DecimalParam(max=12)
@@ -701,19 +716,37 @@ class TestDecimalParam(TestCase):
         with self.assertRaises(ValueError):
             DecimalParam(min="33")
 
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=Decimal("33"))
+        with self.assertRaises(ValueError):
+            DecimalParam(max_decimals=Decimal("333"))
+
         # Default restriction
-        DecimalParam(max=REAL_MAX)
-        DecimalParam(max=REAL_MIN)
-        DecimalParam(min=REAL_MIN)
-        DecimalParam(min=REAL_MAX)
+        DecimalParam(max=DECIMAL_MAX)
+        DecimalParam(max=DECIMAL_MIN)
+        DecimalParam(min=DECIMAL_MIN)
+        DecimalParam(min=DECIMAL_MAX)
+        DecimalParam(max_digits=DECIMAL_MAX_DIGITS)
+        DecimalParam(max_digits=1)
+        DecimalParam(max_decimals=DECIMAL_MAX_DECIMALS)
+        DecimalParam(max_decimals=0)
+
         with self.assertRaises(ValueError):
-            DecimalParam(max=REAL_MAX+1)
+            DecimalParam(max=DECIMAL_MAX+1)
         with self.assertRaises(ValueError):
-            DecimalParam(max=REAL_MIN-1)
+            DecimalParam(max=DECIMAL_MIN-1)
         with self.assertRaises(ValueError):
-            DecimalParam(min=REAL_MIN-1)
+            DecimalParam(min=DECIMAL_MIN-1)
         with self.assertRaises(ValueError):
-            DecimalParam(min=REAL_MAX+1)
+            DecimalParam(min=DECIMAL_MAX+1)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=DECIMAL_MAX_DIGITS+1)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=0)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_decimals=DECIMAL_MAX_DECIMALS+1)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_decimals=-1)
 
     def test_is_valid(self):
         p = DecimalParam(max=Decimal("44"))
@@ -729,6 +762,13 @@ class TestDecimalParam(TestCase):
         p = DecimalParam(max=Decimal("44"), default=Decimal("22"))
         self.assertFalse(p.is_valid(None))
 
+        # decimals and digit restrictions
+        p = DecimalParam(max_digits=4, max_decimals=2)
+        self.assertTrue(p.is_valid(Decimal("22.22")))
+        self.assertTrue(p.is_valid(Decimal("2.22")))
+        self.assertTrue(p.is_valid(Decimal("1111")))
+        self.assertFalse(p.is_valid(Decimal("2.222")))
+        self.assertFalse(p.is_valid(Decimal("22222")))
 
 
 class TestDimmensionParam(TestCase):
@@ -802,18 +842,31 @@ class TestDimmensionParam(TestCase):
             DimmensionParam(min="33")
 
         # Default restriction
-        DimmensionParam(max=REAL_MAX)
+        DimmensionParam(max=DECIMAL_MAX)
         DimmensionParam(max=Decimal("0"))
-        DimmensionParam(min=REAL_MAX)
+        DimmensionParam(min=DECIMAL_MAX)
         DimmensionParam(min=Decimal("0"))
+        DimmensionParam(max_digits=DECIMAL_MAX_DIGITS)
+        DimmensionParam(max_digits=1)
+        DimmensionParam(max_decimals=DECIMAL_MAX_DECIMALS)
+        DimmensionParam(max_decimals=0)
         with self.assertRaises(ValueError):
-            DimmensionParam(max=REAL_MAX+1)
+            DimmensionParam(max=DECIMAL_MAX+1)
         with self.assertRaises(ValueError):
             DimmensionParam(max=Decimal("-1"))
         with self.assertRaises(ValueError):
-            DimmensionParam(min=REAL_MAX+1)
+            DimmensionParam(min=DECIMAL_MAX+1)
         with self.assertRaises(ValueError):
             DimmensionParam(min=Decimal("-1"))
+        with self.assertRaises(ValueError):
+            DimmensionParam(max_digits=DECIMAL_MAX_DIGITS+1)
+        with self.assertRaises(ValueError):
+            DimmensionParam(max_digits=0)
+        with self.assertRaises(ValueError):
+            DimmensionParam(max_decimals=DECIMAL_MAX_DECIMALS+1)
+        with self.assertRaises(ValueError):
+            DimmensionParam(max_decimals=-1)
+
 
     def test_is_valid(self):
         p = DimmensionParam(max=Decimal("44"))
@@ -829,6 +882,15 @@ class TestDimmensionParam(TestCase):
 
         p = DimmensionParam(max=Decimal("44"), default=Decimal("22"))
         self.assertFalse(p.is_valid(None))
+
+        # decimals and digit restrictions
+        p = DimmensionParam(max_digits=4, max_decimals=2)
+        self.assertTrue(p.is_valid(Decimal("22.22")))
+        self.assertTrue(p.is_valid(Decimal("2.22")))
+        self.assertTrue(p.is_valid(Decimal("1111")))
+        self.assertFalse(p.is_valid(Decimal("2.222")))
+        self.assertFalse(p.is_valid(Decimal("22222")))
+
 
 
 
@@ -852,6 +914,10 @@ class TestFileParam(TestCase):
             self.param(max_length=12)
         with self.assertRaises(ValueError):
             self.param(default=12)
+        with self.assertRaises(ValueError):
+            self.param(max_digits=5)
+        with self.assertRaises(ValueError):
+            self.param(max_decimals=2)
 
     def test_is_valid(self):
         p = TextParam(required=True)

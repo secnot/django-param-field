@@ -232,19 +232,27 @@ class TestParserBase(TestCase):
         with self.assertRaises(Exception):
             parse_fields('width: Decimal->default:33')
         
-        # max/min limits   
-        p = parse_fields('width: Decimal->default:999999.9999')
-        self.assertEqual(p['width'].default, Decimal('999999.9999'))
+        # max/min limits
+        p = parse_fields('width: Decimal->default:{}'.format(DECIMAL_MAX))
+        self.assertEqual(p['width'].default, DECIMAL_MAX)
 
-        p = parse_fields('width: Decimal->default:-999999.9999')
-        self.assertEqual(p['width'].default, Decimal('-999999.9999'))
+        p = parse_fields('width: Decimal->default:{}'.format(DECIMAL_MIN))
+        self.assertEqual(p['width'].default, DECIMAL_MIN)
 
         with self.assertRaises(ParseBaseException):
-            parse_fields('width: Decimal->default:1000000.0')
+            parse_fields('width: Decimal->default:{}'.format(DECIMAL_MAX+1))
         
         with self.assertRaises(ParseBaseException):
-            parse_fields('width: Decimal->default:-1000000.0')
-      
+            parse_fields('width: Decimal->default:{}'.format(DECIMAL_MIN-1))
+     
+        # max_digits and max_decimals
+        p = parse_fields('width: Decimal->max_digits: 4 default:999.9')
+        with self.assertRaises(Exception):
+            p = parse_fields('width: Decimal->max_digits: 4 default:9999.9')
+
+        p = parse_fields('width: Decimal->max_decimals: 2 default:999.99')
+        with self.assertRaises(Exception):
+            p = parse_fields('width: Decimal->max_decimals: 1 default:9.999')
 
     def test_empty_choices_list(self):
         """Choices list must contain at least one element"""
@@ -272,6 +280,7 @@ class TestParserBase(TestCase):
         parse_fields('number:Text->max_length:44 min_length:1 required:False')
         parse_fields('activate:Bool->default:False hidden:False required:True')
         parse_fields('name:Text->help_text:"adfasd" label:"text input" required:False')
+        parse_fields('length:Decimal->max:9999.9 min:9.99 default:100.0 max_decimals:2 max_digits:10 required:True default:44.9')
 
         # Test properties case sensitive.
         with self.assertRaises(ParseException):
@@ -284,6 +293,10 @@ class TestParserBase(TestCase):
             parse_fields("number:Integer-> max_length:12")
         with self.assertRaises(ValueError):
             parse_fields("number:Integer-> min_length:12")
+        with self.assertRaises(ValueError):
+            parse_fields("number:Integer-> max_digits:2")
+        with self.assertRaises(ValueError):
+            parse_fields("number:Integer-> max_decimals: 2")
        
         with self.assertRaises(ValueError):
             parse_fields("number:Decimal-> odd:True")
@@ -308,9 +321,13 @@ class TestParserBase(TestCase):
         with self.assertRaises(ValueError):
             parse_fields("comment:Text-> even:True")
         with self.assertRaises(ValueError):
-            parse_fields("comment:Text-> min:True")
+            parse_fields("comment:Text-> min:2")
         with self.assertRaises(ValueError):
-            parse_fields("comment:Text-> max:True")
+            parse_fields("comment:Text-> max:5")
+        with self.assertRaises(ValueError):
+            parse_fields("number:Text-> max_digits:2")
+        with self.assertRaises(ValueError):
+            parse_fields("number:Text-> max_decimals:2")
 
         with self.assertRaises(ValueError):
             parse_fields("activate:Bool-> odd:True")
@@ -324,6 +341,10 @@ class TestParserBase(TestCase):
             parse_fields("activate:Bool-> min_length:1")
         with self.assertRaises(ValueError):
             parse_fields("activate:Bool-> max_length:3")
+        with self.assertRaises(ValueError):
+            parse_fields("activate:Bool-> max_digits:2")
+        with self.assertRaises(ValueError):
+            parse_fields("activate:Bool-> max_decimals:2")
    
         # Test invalid properties
         with self.assertRaises(ParseException):
@@ -363,6 +384,12 @@ class TestParserBase(TestCase):
         p = parse_fields('active:Bool-> label:"the real" help_text:"helpy"')
         self.assertEqual(p['active'].label, "the real")
         self.assertEqual(p['active'].help_text, "helpy")
+
+        p = parse_fields('width:Decimal-> required: True max_digits: 10 max_decimals: 3 min:99.93')
+        self.assertEqual(p['width'].max_digits, 10)
+        self.assertEqual(p['width'].max_decimals, 3)
+        self.assertEqual(p['width'].required, True)
+        self.assertEqual(p['width'].min, Decimal('99.93'))
 
         p = parse_fields('width:Dimmension-> default:12.1 hidden:True')
         self.assertEqual(p['width'].hidden, True)
@@ -407,8 +434,10 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, REAL_MAX)
-        self.assertEqual(p['par'].min, REAL_MIN)  
+        self.assertEqual(p['par'].max, DECIMAL_MAX)
+        self.assertEqual(p['par'].min, DECIMAL_MIN)
+        self.assertEqual(p['par'].max_digits, DECIMAL_MAX_DIGITS)
+        self.assertEqual(p['par'].max_decimals, DECIMAL_MAX_DECIMALS)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
 
@@ -417,8 +446,10 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, REAL_MAX)
+        self.assertEqual(p['par'].max, DECIMAL_MAX)
         self.assertEqual(p['par'].min, Decimal('0.0'))
+        self.assertEqual(p['par'].max_digits, DECIMAL_MAX_DIGITS)
+        self.assertEqual(p['par'].max_decimals, DECIMAL_MAX_DECIMALS)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
         

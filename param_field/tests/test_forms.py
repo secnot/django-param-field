@@ -334,3 +334,45 @@ class TestParamInputForm(TestCase):
         d = ParamDict('width: Bool->default: False')
         form = ParamInputForm(params=d)
         self.assertFalse('checked' in form.as_p())
+
+
+class TestDecimalField(TestCase):
+
+    def test_decimal_validation(self):
+        # Test max_digits, max_decimals,
+        d = ParamDict('width: Decimal-> max_digits: 4 max_decimals: 2')
+        
+        form = ParamInputForm(params=d, data={'width': '33.3'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '33.33'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '3.333'})
+        self.assertFalse(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '33.333'})
+        self.assertFalse(form.is_valid())
+
+        # Test max /min
+        d = ParamDict('width: Decimal-> max: 99.9 min: 2.2')
+        
+        form = ParamInputForm(params=d, data={'width': '33.3'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '1.1'})
+        self.assertFalse(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '100.3'})
+        self.assertFalse(form.is_valid())
+
+
+class TestIntegerField(TestCase):
+
+    def test_integer_validation(self):
+        # Test max and min
+
+
+
+
+        # Test odd even
