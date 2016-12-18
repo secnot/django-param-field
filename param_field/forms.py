@@ -56,13 +56,28 @@ def StdFieldFactory(param, name):
     # Change widget for hidden fields
     if param.hidden or False:
         field_args['widget'] = forms.HiddenInput()
+    
+    choices = param.get_choices()
+    
+    # Add max/min value limits to form field instead of using only param 
+    # field validation. This way the browser limits user input instead of
+    # returning an error when the form is posted and the numbers are out 
+    # of range.
+    if getattr(param, 'max', None) is not None:
+        field_args['max_value'] = param.max
+
+    if getattr(param, 'min', None) is not None:
+        field_args['min_value'] = param.min
 
     # Generate correct Field type or ChoiceField
-    choices = param.get_choices()
     if choices:
         field_args['coerce'] = param.native_type
         field_args['choices'] = choices
+        
+        # Remove options not supported by Typed choice field
         field_args.pop('validators', None)
+        field_args.pop('min_value', None)
+        field_args.pop('max_value', None)
         return forms.TypedChoiceField(**field_args)
     else:
         return FORM_FIELD_CLASS[type(param)](**field_args)

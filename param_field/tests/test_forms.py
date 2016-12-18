@@ -366,13 +366,149 @@ class TestDecimalField(TestCase):
         form = ParamInputForm(params=d, data={'width': '100.3'})
         self.assertFalse(form.is_valid())
 
+    def test_type(self):
+        """Test only integers are accepted"""
+        d = ParamDict('width: Decimal')
+
+        form = ParamInputForm(params=d, data={'width': '11'})
+        self.assertTrue(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'width': '1.11'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': 'abc'})
+        self.assertFalse(form.is_valid())
+
+
+class TestDimmensionField(TestCase):
+
+    def test_dimmension_validation(self):
+        # Test max_digits, max_decimals,
+        d = ParamDict('width: Dimmension-> max_digits: 4 max_decimals: 2')
+        
+        form = ParamInputForm(params=d, data={'width': '33.3'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '33.33'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '3.333'})
+        self.assertFalse(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '33.333'})
+        self.assertFalse(form.is_valid())
+
+        # Test max /min
+        d = ParamDict('width: Dimmension-> max: 99.9 min: 2.2')
+        
+        form = ParamInputForm(params=d, data={'width': '33.3'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '1.1'})
+        self.assertFalse(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': '100.3'})
+        self.assertFalse(form.is_valid())
+
+    def test_type(self):
+        """Test only integers are accepted"""
+        d = ParamDict('width: Dimmension')
+
+        form = ParamInputForm(params=d, data={'width': '11'})
+        self.assertTrue(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'width': '1.11'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'width': 'abc'})
+        self.assertFalse(form.is_valid())
+        
 
 class TestIntegerField(TestCase):
 
     def test_integer_validation(self):
         # Test max and min
+        d = ParamDict('holes: Integer-> max: 40 min: -2')
+
+        form = ParamInputForm(params=d, data={'holes': -2})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'holes': 40})
+        self.assertTrue(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'holes': -3})
+        self.assertFalse(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'holes': 41})
+        self.assertFalse(form.is_valid())
+
+        # Test odd even     
+        d = ParamDict('holes: Integer-> even: True max: 98')
+
+        form = ParamInputForm(params=d, data={'holes': 2})
+        self.assertTrue(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'holes': 3})
+        self.assertFalse(form.is_valid())
+   
+        d = ParamDict('holes: Integer-> odd: True')
+
+        form = ParamInputForm(params=d, data={'holes': 3})
+        self.assertTrue(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'holes': 4})
+        self.assertFalse(form.is_valid())
+
+    def test_type(self):
+        """Test only integers are accepted"""
+        d = ParamDict('holes: Integer')
+
+        form = ParamInputForm(params=d, data={'holes': "11"})
+        self.assertTrue(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'holes': "11.11"})
+        self.assertFalse(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'holes': "abc"})
+        self.assertFalse(form.is_valid())
 
 
+class TestTextField(TestCase):
+
+    def test_text_validation(self):
+        # Test max_length
+        d = ParamDict('name: Text-> max_length: 10')
+
+        form = ParamInputForm(params=d, data={'name': '1234567890'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'name': '12345678901'})
+        self.assertFalse(form.is_valid())
+
+        # Text min_length
+        d = ParamDict('name: Text-> min_length: 3')
+
+        form = ParamInputForm(params=d, data={'name': '123'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'name': '12'})
+        self.assertFalse(form.is_valid())
+
+        # min_length and max_length
+        d = ParamDict('name: Text-> min_length: 5 max_length: 10')
+
+        form = ParamInputForm(params=d, data={'name': '1234567890'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'name': '12345'})
+        self.assertTrue(form.is_valid())
+
+        form = ParamInputForm(params=d, data={'name': '1234'})
+        self.assertFalse(form.is_valid())
+        
+        form = ParamInputForm(params=d, data={'name': '12345678901'})
+        self.assertFalse(form.is_valid())
 
 
-        # Test odd even
+        form = ParamInputForm(params=d, data={'name': '12345678901'})
+        self.assertFalse(form.is_valid())
