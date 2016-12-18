@@ -65,13 +65,7 @@ def StdFieldFactory(param, name):
         'initial': param.default,
         'required': param.required,
         'validators': [ParamFormFieldValidator(param),]} # Use param validator
-
-    # Change widget for hidden fields
-    if param.hidden or False:
-        field_args['widget'] = forms.HiddenInput()
-    
-    choices = param.get_choices()
-    
+   
     # Add max/min value limits to form field instead of using only param 
     # field validation. This way the browser limits user input instead of
     # returning an error when the form is posted and the numbers are out 
@@ -84,7 +78,13 @@ def StdFieldFactory(param, name):
 
     # Add custom widget if any
     field_args['widget'] = FORM_FIELD_WIDGET[type(param)]
-
+    
+    # Change widget for hidden fields
+    if getattr(param, 'hidden', None):
+        field_args['widget'] = forms.HiddenInput()
+    
+    choices = param.get_choices()
+ 
     # Generate correct Field type or ChoiceField
     if choices:
         field_args['coerce'] = param.native_type
