@@ -1,10 +1,18 @@
 from setuptools import setup
 
+
+# How to generate pypi compatible README
+#  sudo apt-get install pandoc
+#  pandoc --from=markdown --to=rst --output=README README.md
+#
+
+#Manually generate 
+
 setup(
 	name='django-param-field',
 	version='0.3.1',
 	description='A Django model field that uses a DSL to define, generate, and validate, custom forms',
-	url='https://github.com/secnot/django-param-field',
+        url='https://github.com/secnot/django-param-field',
 	author='secnot',
 	
 	license='LPGL, see LICENSE file.',

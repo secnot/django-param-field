@@ -61,3 +61,5 @@ target/
 *.swp
 *.swo
 
+# Ignore generated pypi README file
+README
