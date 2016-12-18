@@ -15,6 +15,19 @@ FORM_FIELD_CLASS = {
 }
 
 
+# Field cutom widget
+FORM_FIELD_WIDGET = {
+    BoolParam: None,
+    TextParam: None,
+    TextAreaParam: forms.Textarea,
+    IntegerParam: None,
+    DecimalParam: None,
+    DimmensionParam: None,
+    FileParam: None,
+    ImageParam: None,
+}
+
+
 def expand_name(name):
     """Convert param  name string from 'this_is_a_name' to 'This is a name' so
     it can be used as the a field label
@@ -68,6 +81,9 @@ def StdFieldFactory(param, name):
 
     if getattr(param, 'min', None) is not None:
         field_args['min_value'] = param.min
+
+    # Add custom widget if any
+    field_args['widget'] = FORM_FIELD_WIDGET[type(param)]
 
     # Generate correct Field type or ChoiceField
     if choices:
