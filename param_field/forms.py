@@ -15,6 +15,19 @@ FORM_FIELD_CLASS = {
 }
 
 
+# Field cutom widget
+FORM_FIELD_WIDGET = {
+    BoolParam: None,
+    TextParam: None,
+    TextAreaParam: forms.Textarea,
+    IntegerParam: None,
+    DecimalParam: None,
+    DimmensionParam: None,
+    FileParam: None,
+    ImageParam: None,
+}
+
+
 def expand_name(name):
     """Convert param  name string from 'this_is_a_name' to 'This is a name' so
     it can be used as the a field label
@@ -51,18 +64,36 @@ def StdFieldFactory(param, name):
         'label': param.label or expand_name(name),
         'initial': param.default,
         'required': param.required,
-        'validators': [ParamFormFieldValidator(param),]}
+        'validators': [ParamFormFieldValidator(param),]} # Use param validator
+   
+    # Add max/min value limits to form field instead of using only param 
+    # field validation. This way the browser limits user input instead of
+    # returning an error when the form is posted and the numbers are out 
+    # of range.
+    if getattr(param, 'max', None) is not None:
+        field_args['max_value'] = param.max
 
+    if getattr(param, 'min', None) is not None:
+        field_args['min_value'] = param.min
+
+    # Add custom widget if any
+    field_args['widget'] = FORM_FIELD_WIDGET[type(param)]
+    
     # Change widget for hidden fields
-    if param.hidden or False:
+    if getattr(param, 'hidden', None):
         field_args['widget'] = forms.HiddenInput()
-
-    # Generate correct Field type or ChoiceField
+    
     choices = param.get_choices()
+ 
+    # Generate correct Field type or ChoiceField
     if choices:
         field_args['coerce'] = param.native_type
         field_args['choices'] = choices
+        
+        # Remove options not supported by Typed choice field
         field_args.pop('validators', None)
+        field_args.pop('min_value', None)
+        field_args.pop('max_value', None)
         return forms.TypedChoiceField(**field_args)
     else:
         return FORM_FIELD_CLASS[type(param)](**field_args)

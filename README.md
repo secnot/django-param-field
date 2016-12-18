@@ -143,13 +143,15 @@ fieldname: type-> property: value
 	* Integer
 	* Text
 	* TextArea
+	* File
+	* Image
 
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
 	* ALL: hidden required label help_text
 	* Bool: default
 	* Integer: default even odd max min choices
-	* Decimal: default max min choices
+	* Decimal: default max min choices max_digits max_decimals
 	* Text: default max_length min_length choices
 	* TextArea: default max_length
 	* File: (doesn't support hidden)
@@ -179,5 +181,5 @@ README
 ## TODO
 
 * Better parser error messages
-* Better settings managment into settigs.py
+* Better settings managment into settings.py
 

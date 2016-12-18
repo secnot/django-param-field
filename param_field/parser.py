@@ -20,7 +20,7 @@ reserved_keywords = Keyword("Integer")|Keyword("Bool")|Keyword("Dimmension")\
         |Keyword("Image")|Keyword("default")|Keyword("min_length")|Keyword("max_length")\
         |Keyword("min")|Keyword("max")|Keyword("help_text")|Keyword("label")\
         |Keyword("hidden")|Keyword("odd")|Keyword("even")|Keyword("choices")\
-        |Keyword("required")
+        |Keyword("required")|Keyword("max_digits")|Keyword("max_decimals")
 
 cvtInt = lambda t: int(t[0])
 cvtDec = lambda t: Decimal(t[0])
@@ -78,6 +78,7 @@ def fieldToParam(token):
     name, field_type, props = token.field 
     return (name, FIELD_TO_PARAM[field_type](**props))
 
+
 lowercase = "abcdefghijklmnopqrstuvwxyz"
 lowercasenums = "abcdefghijklmnopqrstuvwxyz0123456789"
 arithOp = Word("+-*/^", max=1)
@@ -95,7 +96,7 @@ integer = Combine(Optional(plusorminus)+number)\
     .addParseAction(rangeCheck(INT_MIN, INT_MAX))
 real = Combine(Optional(plusorminus)+number+"."+number)\
     .setName("real").setParseAction(cvtDec)\
-    .addParseAction(rangeCheck(REAL_MIN, REAL_MAX))
+    .addParseAction(rangeCheck(DECIMAL_MIN, DECIMAL_MAX))
 string = QuotedString('"', escChar='\\')\
     .setName("string")\
     .addParseAction(lengthCheck())
@@ -110,7 +111,7 @@ lst = Group(lbrack+lst_elem+ZeroOrMore(comma+lst_elem)+Optional(comma)+rbrack)\
 identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=30)
 
 
-key = oneOf("default min_length max_length min max help_text label hidden odd even choices required")\
+key = oneOf("default min_length max_length min max help_text label hidden odd even choices required max_digits max_decimals")\
     .setResultsName("property_name")
 value = (real | integer | boolean | string | lst).setResultsName("property_value")
 field_property = Group(key + colon + value)

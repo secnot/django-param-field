@@ -381,12 +381,12 @@ class StringMixin(object):
     
     def _validate_max_length(self, value):
         if self.max_length is not None and len(value)>self.max_length:
-            err = "Must be at most {} characters long".format(self.max_length)
+            err = "Can be at most {} characters long".format(self.max_length)
             raise ValidationError(err)
     
     def _validate_min_length(self, value):
         if self.min_length is not None and len(value)<self.min_length:
-            err = "Must be at least {} characters long".format(self.min_length)
+            err = "Has to be at least {} characters long".format(self.min_length)
             raise ValidationError(err)
 
 
@@ -423,21 +423,59 @@ class DecimalParam(Param, NumberMixin):
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True),
-        ('min', Decimal, REAL_MIN),
-        ('max', Decimal, REAL_MAX),
+        ('max_digits', int, DECIMAL_MAX_DIGITS),
+        ('max_decimals', int, DECIMAL_MAX_DECIMALS),
+        ('min', Decimal, DECIMAL_MIN),
+        ('max', Decimal, DECIMAL_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
         ('hidden', bool, False)]
 
-class DimmensionParam(Param, NumberMixin):
+    @staticmethod
+    def _decimal_digits(dec):
+        """Return decimal number digits"""
+        return len(dec.as_tuple().digits)
+
+    @staticmethod
+    def _decimal_decimals(dec):
+        """Return decimal number decimals"""
+        return abs(dec.as_tuple().exponent)
+
+    def _init_max_digits(self, value):
+        if value <= 0:
+            raise ValueError("Invalid 'max_digits' must be greater than zero")
+
+        if value > DECIMAL_MAX_DIGITS:
+            raise ValueError("Invalid 'max_digits' too big")
+        self.max_digits = value
+    
+    def _init_max_decimals(self, value):
+        if value < 0:
+            raise ValueError("Invalid 'max_decimals' must be greater or equal to zero")
+
+        if value > DECIMAL_MAX_DECIMALS:
+            raise ValueError("Invalid 'max_decimals' too big")
+        self.max_decimals = value
+
+    def _validate_max_digits(self, value):   
+        if DecimalParam._decimal_digits(value) > self.max_digits:
+            raise ValueError("Too many digits. (max: {})".format(self.max_digits))
+
+    def _validate_max_decimals(self, value):
+        if DecimalParam._decimal_decimals(value) > self.max_decimals:
+            raise ValueError("Too many decimals. (max: {})".format(self.max_decimals))
+
+class DimmensionParam(DecimalParam):
     native_type = Decimal
-    type_name = 'Dimmension'
+    type_name = 'Dimmension' 
     allowed_properties = [
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True),
-        ('min', Decimal, Decimal('0.0')),
-        ('max', Decimal, REAL_MAX),
+        ('max_digits', int, DECIMAL_MAX_DIGITS),
+        ('max_decimals', int, DECIMAL_MAX_DECIMALS),
+        ('min', Decimal, Decimal("0")),
+        ('max', Decimal, DECIMAL_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
         ('hidden', bool, False)]
@@ -457,7 +495,6 @@ class TextParam(Param, StringMixin):
 
 class TextAreaParam(TextParam):
     type_name = 'TextArea'
-    pass
     #TODO: Custom widget
 
 
