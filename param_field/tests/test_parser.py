@@ -195,18 +195,22 @@ class TestParserBase(TestCase):
         self.assertEqual(p['holes'].default, -1)
 
         # max/min limits
-        p = parse_fields('holes: Integer->default:999999')
-        self.assertEqual(p['holes'].default, 999999)
+        p = parse_fields('holes: Integer->default:{}'.format(settings.INT_MAX))
+        self.assertEqual(p['holes'].default, settings.INT_MAX)
 
-        p = parse_fields('holes: Integer->default:-999999')
-        self.assertEqual(p['holes'].default, -999999)
+        p = parse_fields('holes: Integer->default:{}'.format(settings.INT_MIN))
+        self.assertEqual(p['holes'].default, settings.INT_MIN)
 
         with self.assertRaises(ParseBaseException):
-            parse_fields('holes: Integer->default:1000000')
+            parse_fields('holes: Integer->default:{}'.format(settings.INT_MAX+1))
         
         with self.assertRaises(ParseBaseException):
-            parse_fields('holes: Integer->default:-1000000')
-        
+            parse_fields('holes: Integer->default:{}'.format(settings.INT_MIN-1))
+       
+        # Try overflow integer
+        long_long_int = "9"+"9"*10000
+        with self.assertRaises(ParseBaseException):
+            parse_fields('holes: Integer->default:{}'.format(long_long_int))
     
     def test_decimal_parsing(self):
         """Test valid decimal values"""
@@ -254,6 +258,11 @@ class TestParserBase(TestCase):
         p = parse_fields('width: Decimal->max_decimals: 2 default:999.99')
         with self.assertRaises(Exception):
             p = parse_fields('width: Decimal->max_decimals: 1 default:9.999')
+
+        # Try overflow decimal
+        long_long_decimal = "9"*10000+'.'+"9"*10000
+        with self.assertRaises(ParseBaseException):
+            parse_fields('width: Decimal-> default:{}'.format(long_long_decimal))
 
     def test_empty_choices_list(self):
         """Choices list must contain at least one element"""
