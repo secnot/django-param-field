@@ -125,6 +125,10 @@ class CustomProductFormView(FormView):
 		...
 ```
 
+See this [blog post](http://www.secnot.com/django-param-field-en.html) for a longer
+tutorial, that includes an example on how to handle File and Image fields.
+
+
 ## Syntax
 
 Each ParamField can have one or more fields with the following syntax
