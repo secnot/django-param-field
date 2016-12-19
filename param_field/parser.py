@@ -48,7 +48,7 @@ def rangeCheck(minval=None, maxval=None):
 
     return rangeCheckParseAction    
 
-def lengthCheck(max_length=STRING_MAX_LENGTH):
+def lengthCheck(max_length=settings.STRING_MAX_LENGTH):
 
     def lengthCheckParseAction(string, loc, tokens):
         if len(tokens[0]) > max_length:
@@ -93,10 +93,10 @@ number = Word(nums)
 # Define data primitives and limits
 integer = Combine(Optional(plusorminus)+number)\
     .setName("integer").setParseAction(cvtInt)\
-    .addParseAction(rangeCheck(INT_MIN, INT_MAX))
+    .addParseAction(rangeCheck(settings.INT_MIN, settings.INT_MAX))
 real = Combine(Optional(plusorminus)+number+"."+number)\
     .setName("real").setParseAction(cvtDec)\
-    .addParseAction(rangeCheck(DECIMAL_MIN, DECIMAL_MAX))
+    .addParseAction(rangeCheck(settings.DECIMAL_MIN, settings.DECIMAL_MAX))
 string = QuotedString('"', escChar='\\')\
     .setName("string")\
     .addParseAction(lengthCheck())

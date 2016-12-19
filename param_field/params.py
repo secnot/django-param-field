@@ -5,7 +5,7 @@ from decimal import Decimal
 from numbers import Number
 from collections import OrderedDict
 import json
-from .limits import *
+from .conf import settings
 
 class ParamDict(OrderedDict):
   
@@ -176,7 +176,7 @@ class Param(object):
 
     def _init_label(self, value):
         """Initialize Param for label property"""
-        if len(value)>LABEL_MAX_LENGTH:
+        if len(value)>settings.LABEL_MAX_LENGTH:
             raise ValueError("'{}' label too long".format(value))
         self.label = value
 
@@ -193,7 +193,7 @@ class Param(object):
             raise ValueError('A default value must be provided for hidden parameters')
 
     def _init_help_text(self, value):
-        if len(value)>HELP_TEXT_MAX_LENGTH:
+        if len(value)>settings.HELP_TEXT_MAX_LENGTH:
             raise ValueError("help text too long".format(value))
         self.help_text = value
 
@@ -370,12 +370,12 @@ class NumberMixin(object):
 class StringMixin(object):
 
     def _init_max_length(self, value):
-        if value > STRING_MAX_LENGTH or value < 0:
+        if value > settings.STRING_MAX_LENGTH or value < 0:
             raise ValueError("Invalid 'max_length' value")
         self.max_length = value
     
     def _init_min_length(self, value):
-        if value > STRING_MAX_LENGTH or value < 0:
+        if value > settings.STRING_MAX_LENGTH or value < 0:
             raise ValueError("Invalid 'min_length' value")
         self.min_length = value
     
@@ -410,8 +410,8 @@ class IntegerParam(Param, NumberMixin):
         ('required', bool, True),
         ('even', bool, False),
         ('odd', bool, False),
-        ('min', int, INT_MIN),
-        ('max', int, INT_MAX),
+        ('min', int, settings.INT_MIN),
+        ('max', int, settings.INT_MAX),
         ('choices', list, None),
         ('default', int, None),
         ('hidden', bool, False)]
@@ -423,13 +423,16 @@ class DecimalParam(Param, NumberMixin):
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True),
-        ('max_digits', int, DECIMAL_MAX_DIGITS),
-        ('max_decimals', int, DECIMAL_MAX_DECIMALS),
-        ('min', Decimal, DECIMAL_MIN),
-        ('max', Decimal, DECIMAL_MAX),
+        ('max_digits', int, settings.DECIMAL_MAX_DIGITS),
+        ('max_decimals', int, settings.DECIMAL_MAX_DECIMALS),
+        ('min', Decimal, settings.DECIMAL_MIN),
+        ('max', Decimal, settings.DECIMAL_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
         ('hidden', bool, False)]
+
+    abs_max_digits = settings.DECIMAL_MAX_DIGITS
+    abs_max_decimals = settings.DECIMAL_MAX_DECIMALS
 
     @staticmethod
     def _decimal_digits(dec):
@@ -445,16 +448,18 @@ class DecimalParam(Param, NumberMixin):
         if value <= 0:
             raise ValueError("Invalid 'max_digits' must be greater than zero")
 
-        if value > DECIMAL_MAX_DIGITS:
-            raise ValueError("Invalid 'max_digits' too big")
+        if value > self.abs_max_digits:
+            raise ValueError("Invalid 'max_digits' too big (max: {})".format(
+                self.abs_max_digits))
         self.max_digits = value
     
     def _init_max_decimals(self, value):
         if value < 0:
             raise ValueError("Invalid 'max_decimals' must be greater or equal to zero")
 
-        if value > DECIMAL_MAX_DECIMALS:
-            raise ValueError("Invalid 'max_decimals' too big")
+        if value > self.abs_max_decimals:
+            raise ValueError("Invalid 'max_decimals' too big (max: {})".format(
+                    self.abs_max_decimals))
         self.max_decimals = value
 
     def _validate_max_digits(self, value):   
@@ -472,13 +477,16 @@ class DimmensionParam(DecimalParam):
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True),
-        ('max_digits', int, DECIMAL_MAX_DIGITS),
-        ('max_decimals', int, DECIMAL_MAX_DECIMALS),
-        ('min', Decimal, Decimal("0")),
-        ('max', Decimal, DECIMAL_MAX),
+        ('max_digits', int, settings.DIMMENSION_MAX_DIGITS),
+        ('max_decimals', int, settings.DIMMENSION_MAX_DECIMALS),
+        ('min', Decimal, max(Decimal("0"), settings.DIMMENSION_MIN)),
+        ('max', Decimal, settings.DIMMENSION_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
         ('hidden', bool, False)]
+    
+    abs_max_digits = settings.DIMMENSION_MAX_DIGITS
+    abs_max_decimals = settings.DIMMENSION_MAX_DECIMALS
 
 class TextParam(Param, StringMixin):
     native_type = str
@@ -488,7 +496,7 @@ class TextParam(Param, StringMixin):
         ('help_text', str, ''),
         ('required', bool, True),
         ('min_length', int, 0),
-        ('max_length', int, STRING_MAX_LENGTH),
+        ('max_length', int, settings.STRING_MAX_LENGTH),
         ('choices', list, None),
         ('default', str, None),
         ('hidden', bool, False)]

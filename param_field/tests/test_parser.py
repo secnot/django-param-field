@@ -6,7 +6,8 @@ from collections import OrderedDict
 
 from param_field.parser import parse_fields
 from param_field.params import *
-from param_field.limits import *
+from param_field.conf import settings
+
 
 class TestParserBase(TestCase):
 
@@ -135,11 +136,11 @@ class TestParserBase(TestCase):
 
         # Length Limit
         p = parse_fields('name: Text-> default:"{}"'\
-                .format("a"*STRING_MAX_LENGTH))
+                .format("a"*settings.STRING_MAX_LENGTH))
 
         with self.assertRaises(ParseBaseException):
             parse_fields('name: Text-> default:"{}"'\
-                .format("a"*(STRING_MAX_LENGTH+1)))
+                .format("a"*(settings.STRING_MAX_LENGTH+1)))
 
     def test_boolean_parsing(self):
         """Test wich boolean strings are accepted"""
@@ -233,17 +234,17 @@ class TestParserBase(TestCase):
             parse_fields('width: Decimal->default:33')
         
         # max/min limits
-        p = parse_fields('width: Decimal->default:{}'.format(DECIMAL_MAX))
-        self.assertEqual(p['width'].default, DECIMAL_MAX)
+        p = parse_fields('width: Decimal->default:{}'.format(settings.DECIMAL_MAX))
+        self.assertEqual(p['width'].default, settings.DECIMAL_MAX)
 
-        p = parse_fields('width: Decimal->default:{}'.format(DECIMAL_MIN))
-        self.assertEqual(p['width'].default, DECIMAL_MIN)
+        p = parse_fields('width: Decimal->default:{}'.format(settings.DECIMAL_MIN))
+        self.assertEqual(p['width'].default, settings.DECIMAL_MIN)
 
         with self.assertRaises(ParseBaseException):
-            parse_fields('width: Decimal->default:{}'.format(DECIMAL_MAX+1))
+            parse_fields('width: Decimal->default:{}'.format(settings.DECIMAL_MAX+1))
         
         with self.assertRaises(ParseBaseException):
-            parse_fields('width: Decimal->default:{}'.format(DECIMAL_MIN-1))
+            parse_fields('width: Decimal->default:{}'.format(settings.DECIMAL_MIN-1))
      
         # max_digits and max_decimals
         p = parse_fields('width: Decimal->max_digits: 4 default:999.9')
@@ -412,7 +413,7 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max_length, STRING_MAX_LENGTH)
+        self.assertEqual(p['par'].max_length, settings.STRING_MAX_LENGTH)
         self.assertEqual(p['par'].min_length, 0)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
@@ -422,8 +423,8 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, INT_MAX)
-        self.assertEqual(p['par'].min, INT_MIN)
+        self.assertEqual(p['par'].max, settings.INT_MAX)
+        self.assertEqual(p['par'].min, settings.INT_MIN)
         self.assertEqual(p['par'].even, False)
         self.assertEqual(p['par'].odd, False) 
         self.assertEqual(p['par'].hidden, False)
@@ -434,10 +435,10 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, DECIMAL_MAX)
-        self.assertEqual(p['par'].min, DECIMAL_MIN)
-        self.assertEqual(p['par'].max_digits, DECIMAL_MAX_DIGITS)
-        self.assertEqual(p['par'].max_decimals, DECIMAL_MAX_DECIMALS)
+        self.assertEqual(p['par'].max, settings.DECIMAL_MAX)
+        self.assertEqual(p['par'].min, settings.DECIMAL_MIN)
+        self.assertEqual(p['par'].max_digits, settings.DECIMAL_MAX_DIGITS)
+        self.assertEqual(p['par'].max_decimals, settings.DECIMAL_MAX_DECIMALS)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
 
@@ -446,10 +447,10 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, DECIMAL_MAX)
+        self.assertEqual(p['par'].max, settings.DIMMENSION_MAX)
         self.assertEqual(p['par'].min, Decimal('0.0'))
-        self.assertEqual(p['par'].max_digits, DECIMAL_MAX_DIGITS)
-        self.assertEqual(p['par'].max_decimals, DECIMAL_MAX_DECIMALS)
+        self.assertEqual(p['par'].max_digits, settings.DIMMENSION_MAX_DIGITS)
+        self.assertEqual(p['par'].max_decimals, settings.DIMMENSION_MAX_DECIMALS)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
         
