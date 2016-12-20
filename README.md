@@ -168,6 +168,35 @@ fieldname: type-> property: value
 	* String - "string with scape \\"chars\\" "
 	* Value list - [value, value, value]
 
+
+## Configuration
+
+Param fields 
+
+
+    # This are the absolute limits for all fields
+    PARAM_LABEL_MAX_LENGTH = 40
+    PARAM_HELP_TEXT_MAX_LENGTH = 200
+
+    # Itegers
+    PARAM_INT_MAX =  2147483647
+    PARAM_INT_MIN = -2147483648
+
+    # Decimal
+    PARAM_DECIMAL_MAX = Decimal("9999999999999999.9999") 
+    PARAM_DECIMAL_MIN = Decimal("-9999999999999999.9999")
+    PARAM_DECIMAL_MAX_DIGITS = 20
+    PARAM_DECIMAL_MAX_DECIMALS = 4
+
+    # Dimmension
+    PARAM_DIMMENSION_MAX = Decimal("99999999.9999")
+    PARAM_DIMMENSION_MIN = Decimal("0.0")
+    PARAM_DIMMENSION_MAX_DIGITS = 12
+    PARAM_DIMMENSION_MAX_DECIMALS = 4
+
+    # Strings
+    PARAM_STRING_MAX_LENGTH = 300
+ 
 ## Testing
 
 Once the app has been added to settings.py, you can run the tests with:
