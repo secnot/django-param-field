@@ -152,12 +152,12 @@ fieldname: type-> property: value
 
 * **property** - One or more of the properties accepted by the field type
 	followed by a value.
-	* ALL: hidden required label help_text
+	* ALL: hidden. required, label, help_text
 	* Bool: default
-	* Integer: default even odd max min choices
-	* Decimal: default max min choices max_digits max_decimals
-	* Text: default max_length min_length choices
-	* TextArea: default max_length
+	* Integer: default, even, odd, max, min, choices
+	* Decimal: default, max, min, choices, max_digits, max_decimals
+	* Text: default, max_length, min_length, choices
+	* TextArea: default, max_length
 	* File: (doesn't support hidden)
 	* Image: (doesn't support hidden) 
 
@@ -171,10 +171,12 @@ fieldname: type-> property: value
 
 ## Configuration
 
-Param fields 
+The absolute limits for the fields are configurable through **settings.py** these are
+hard limits, so if for example **PARAM_INT_MAX** is 5000 creating a new Integer field 
+where max or default properties value is bigger will fail.
 
-
-    # This are the absolute limits for all fields
+``` python
+    # This are the default absolute limits for each field / field property
     PARAM_LABEL_MAX_LENGTH = 40
     PARAM_HELP_TEXT_MAX_LENGTH = 200
 
@@ -196,7 +198,8 @@ Param fields
 
     # Strings
     PARAM_STRING_MAX_LENGTH = 300
- 
+```
+
 ## Testing
 
 Once the app has been added to settings.py, you can run the tests with:
