@@ -173,10 +173,11 @@ fieldname: type-> property: value
 
 The absolute limits for the fields properties are configurable through **settings.py** 
 these are hard limits, so if for example **PARAM_INT_MAX** is 5000 creating a new Integer 
-field where **max** or **min** properties values are bigger will fail.
+field where **max** or **min** properties values are bigger will fail. These are the 
+default values:
 
 ``` python
-    # This are the default absolute limits for each field / field property
+    # settings.py
 
 	# Max lengths for label and help_text strings
     PARAM_LABEL_MAX_LENGTH = 40
@@ -224,5 +225,4 @@ README
 ## TODO
 
 * Better parser error messages
-* Better settings managment into settings.py
 
