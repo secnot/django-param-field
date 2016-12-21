@@ -177,35 +177,35 @@ field where **max** or **min** properties values are bigger will fail. These are
 default values:
 
 ``` python
-    # settings.py
+# settings.py
 
-	# Max lengths for label and help_text strings
-    PARAM_LABEL_MAX_LENGTH = 40
-    PARAM_HELP_TEXT_MAX_LENGTH = 200
+# Max lengths for label and help_text strings
+PARAM_LABEL_MAX_LENGTH = 40
+PARAM_HELP_TEXT_MAX_LENGTH = 200
 
-    # Max and Min integer values, these have been chosen so integers don't cause
-	# problems when stored in any DB
-    PARAM_INT_MAX =  2147483647
-    PARAM_INT_MIN = -2147483648
+# Max and Min integer values, these have been chosen so integers don't cause
+# problems when stored in any DB
+PARAM_INT_MAX =  2147483647
+PARAM_INT_MIN = -2147483648
 
-	# The maximum number of digits allowed and the max decimal places
-    PARAM_DECIMAL_MAX_DIGITS = 20
-    PARAM_DECIMAL_MAX_DECIMALS = 4
+# The maximum number of digits allowed and the max decimal places
+PARAM_DECIMAL_MAX_DIGITS = 20
+PARAM_DECIMAL_MAX_DECIMALS = 4
 
-    # Decimal max and min (must have valid number of digits/decimals)
-    PARAM_DECIMAL_MAX = Decimal("9999999999999999.9999") 
-    PARAM_DECIMAL_MIN = Decimal("-9999999999999999.9999")
+# Decimal max and min (must have valid number of digits/decimals)
+PARAM_DECIMAL_MAX = Decimal("9999999999999999.9999") 
+PARAM_DECIMAL_MIN = Decimal("-9999999999999999.9999")
 
-	# Dimmension digits/decimals
-    PARAM_DIMMENSION_MAX_DIGITS = 12
-    PARAM_DIMMENSION_MAX_DECIMALS = 4
+# Dimmension digits/decimals
+PARAM_DIMMENSION_MAX_DIGITS = 12
+PARAM_DIMMENSION_MAX_DECIMALS = 4
 
-    # Dimmension max and min
-    PARAM_DIMMENSION_MAX = Decimal("99999999.9999")
-    PARAM_DIMMENSION_MIN = Decimal("0.0")
+# Dimmension max and min
+PARAM_DIMMENSION_MAX = Decimal("99999999.9999")
+PARAM_DIMMENSION_MIN = Decimal("0.0")
 
-    # Text/TextArea max length
-    PARAM_TEXT_MAX_LENGTH = 300
+# Text/TextArea max length
+PARAM_TEXT_MAX_LENGTH = 300
 ```
 
 ## Testing
@@ -219,8 +219,8 @@ $ python manage.py test param_field
 ## References
 
 * [Domain speficific languages python slide](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-* [Small django-param-field tutorial](http://www.secnot.com/django-param-field-en.html) with a longer example than the
-README
+* [Small django-param-field tutorial](http://www.secnot.com/django-param-field-en.html) with a longer example than the one
+in this README.
 
 ## TODO
 
