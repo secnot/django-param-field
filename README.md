@@ -173,7 +173,7 @@ fieldname: type-> property: value
 
 The absolute limits for the fields are configurable through **settings.py** these are
 hard limits, so if for example **PARAM_INT_MAX** is 5000 creating a new Integer field 
-where max or default properties value is bigger will fail.
+where max or default properties values are bigger will fail.
 
 ``` python
     # This are the default absolute limits for each field / field property

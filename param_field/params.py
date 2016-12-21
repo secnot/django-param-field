@@ -7,6 +7,7 @@ from collections import OrderedDict
 import json
 from .conf import settings
 
+
 class ParamDict(OrderedDict):
   
     def __init__(self, fields='', file_support=False, parse=True):
@@ -55,29 +56,6 @@ class ParamDict(OrderedDict):
         kwargs['params'] = self
         return ParamInputForm(*args, **kwargs)
 
-    def serialize(self, request):
-        """Convert each value to its representation so it can be easily stored
-
-        Argumens:
-            request (dictionary): value for each parameter.
-        """
-        serialized = {}
-        for name, value in request.items():
-            serialized[name] = self[name].serialize_value(value)
-        return serialized
-
-    def deserialize(self, request):
-        """The oposite step to 'request_to_dict' convert all values from its 
-        representation to its real python value, that can be later be validated.
-        
-        Arguments:
-            request (dict): Request dict containing serialized values
-        """
-        deserialized = {}
-        for name, value in request.items():
-            deserialized[name] = self[name].deserialize_value(value)
-        return deserialized
-
     def validate(self, request):
         """
         Validate request against ParamDict parameters.
@@ -88,17 +66,15 @@ class ParamDict(OrderedDict):
         # Check no unknown parameter present in the request
         for name, value in request.items():
             if self.get(name, None) is None:
-                raise ValidationError("Parameter '{}' does not exists"\
-                        .format(name))
+                raise ValidationError("Unknown parameter '{}'".format(name))
 
         # Validate request against parameter definitions
         for name, value in self.items():
-            # TODO if no value was provided if there is a default value the 
-            # request is valid
+            # Check a valid values were provided for each required parameter
             try:
                 value = request.get(name, None)
                 param = self[name]
-                if value is None:
+                if param.required and value is None:
                     default = param.get_default()
                     if default is None:
                         raise ValidationError("No value supplied for {}"\
@@ -127,18 +103,11 @@ class ParamDict(OrderedDict):
 
         return with_defaults
 
-    def param_count(self):
-        """Returns number of parameters in the dictionary, constants
-        are not counted.
-        
-        Returns:
-            int
-        """
-        params = 0
-        for name, value in self.items():
-            if isinstance(value, Param):
-                params += 1
-        return params
+        dict_str = ""
+        for name, param in self.items():        
+            dict_str += name+':'+str(param)+'\n'
+
+        return dict_str
 
 # Property -> allowed types | limits
 
@@ -277,10 +246,7 @@ class Param(object):
             return False
 
     def deserialize_value(self, value):
-        """Convert from value representation to the actual value object
-        for example: slug string TO model instance
-        USED BY FOREIGN KEY AND FILE PARAMS  
-        """
+        """Convert from value representation to the actual value object"""
         if not type(value) == self.native_type:
             err = "Expected '{}' received '{}'"\
                 .format(self.native_type.__name__, type(value).__name__)
@@ -288,9 +254,7 @@ class Param(object):
         return value
 
     def serialize_value(self, value):
-        """to_python reverse step
-        USED BY FOREIGN KEY AND FILE PARAMS 
-        """
+        """to_python reverse step"""
         return value
 
     def value_to_str(self, value):
@@ -366,6 +330,7 @@ class NumberMixin(object):
     def _validate_odd(self, value):
         if self.odd and value%2==0:
              raise ValidationError("Value must be odd")
+
 
 class StringMixin(object):
 
@@ -503,7 +468,6 @@ class TextParam(Param, StringMixin):
 
 class TextAreaParam(TextParam):
     type_name = 'TextArea'
-    #TODO: Custom widget
 
 
 # File Params

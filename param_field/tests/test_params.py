@@ -9,16 +9,14 @@ from decimal import Decimal
 class TestParamDict(TestCase):
 
     def test_param_count(self): 
-        """Test param_count returns correct number"""
+        """Test len returns correct parameter number"""
         d = ParamDict("""
             bool:Bool->default:True label:"enable"
             int:Integer->default:44 label:"number of holes" """)
-        self.assertEqual(d.param_count(), 2)
+        self.assertEqual(len(d), 2)
  
         d = ParamDict(""" """)
-        self.assertEqual(d.param_count(), 0)
-
-        #TODO:  Test dict with contants when implemented
+        self.assertEqual(len(d), 0)
 
     def test_validate(self):
         p1 = BoolParam(default=True, label="enable")
