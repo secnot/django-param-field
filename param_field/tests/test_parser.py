@@ -136,11 +136,11 @@ class TestParserBase(TestCase):
 
         # Length Limit
         p = parse_fields('name: Text-> default:"{}"'\
-                .format("a"*settings.PARAM_STRING_MAX_LENGTH))
+                .format("a"*settings.PARAM_TEXT_MAX_LENGTH))
 
         with self.assertRaises(ParseBaseException):
             parse_fields('name: Text-> default:"{}"'\
-                .format("a"*(settings.PARAM_STRING_MAX_LENGTH+1)))
+                .format("a"*(settings.PARAM_TEXT_MAX_LENGTH+1)))
 
     def test_boolean_parsing(self):
         """Test wich boolean strings are accepted"""
@@ -422,7 +422,7 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max_length, settings.PARAM_STRING_MAX_LENGTH)
+        self.assertEqual(p['par'].max_length, settings.PARAM_TEXT_MAX_LENGTH)
         self.assertEqual(p['par'].min_length, 0)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)

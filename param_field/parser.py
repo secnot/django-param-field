@@ -48,7 +48,7 @@ def rangeCheck(minval=None, maxval=None):
 
     return rangeCheckParseAction    
 
-def lengthCheck(max_length=settings.PARAM_STRING_MAX_LENGTH):
+def lengthCheck(max_length=settings.PARAM_TEXT_MAX_LENGTH):
 
     def lengthCheckParseAction(string, loc, tokens):
         if len(tokens[0]) > max_length:

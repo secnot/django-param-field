@@ -41,7 +41,7 @@ class Settings(AppSettings):
     PARAM_DIMMENSION_MAX_DECIMALS = 4
 
     # Strings
-    PARAM_STRING_MAX_LENGTH = 300
+    PARAM_TEXT_MAX_LENGTH = 300
     
 
 settings = Settings()

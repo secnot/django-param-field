@@ -250,9 +250,9 @@ class TestBaseParam(TestCase):
         with self.assertRaises(ValueError):
             IntegerParam(choices=[Decimal('12'), settings.PARAM_DECIMAL_MIN-1])
 
-        TextParam(default="a"*settings.PARAM_STRING_MAX_LENGTH)
+        TextParam(default="a"*settings.PARAM_TEXT_MAX_LENGTH)
         with self.assertRaises(ValueError):
-            TextParam(default="b"*(settings.PARAM_STRING_MAX_LENGTH+1))
+            TextParam(default="b"*(settings.PARAM_TEXT_MAX_LENGTH+1))
 
     def test_get_choices(self):
         """Test returns choice-name pair list"""
@@ -508,13 +508,17 @@ class TestTextParam(TestCase):
             self.param(max_length=9, min_length=2, choices=["12", "1234567890"])
         with self.assertRaises(ValueError):
             self.param(min_length=-1)
+        with self.assertRaises(ValueError):
+            self.param(max_length=-1)
+        with self.assertRaises(ValueError):
+            self.param(max_length=11, min_length=12)
 
-    def test_absolute_property_limits(self):
+    def test_max_length_property_limits(self):
         """Test absolute limits set in config for the properties
         are used"""
-        self.param(max_length=settings.PARAM_STRING_MAX_LENGTH)
+        self.param(max_length=settings.PARAM_TEXT_MAX_LENGTH)
         with self.assertRaises(ValueError):
-            self.param(max_length=settings.PARAM_STRING_MAX_LENGTH+1)
+            self.param(max_length=settings.PARAM_TEXT_MAX_LENGTH+1)
 
     def test_is_valid(self):
         p = self.param(min_length=3,)
@@ -693,9 +697,14 @@ class TestDecimalParam(TestCase):
 
         # Max/min value has too many digits/decimals
         with self.assertRaises(ValueError):
-            IntegerParam(max_digits=5, max=Decimal('999999'))
+            DecimalParam(max_digits=5, max=Decimal('999999'))
         with self.assertRaises(ValueError):
-            IntegerParam(max_decimals=2, min=Decimal('44.999'))
+            DecimalParam(max_decimals=2, min=Decimal('44.999'))
+
+        # Test max_decimals must be smaller or equal to max_digits
+        DecimalParam(max_digits=2, max_decimals=2)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=2, max_decimals=3)
 
         # Types
         with self.assertRaises(ValueError):
@@ -720,7 +729,6 @@ class TestDecimalParam(TestCase):
             DecimalParam(max_digits=Decimal("33"))
         with self.assertRaises(ValueError):
             DecimalParam(max_decimals=Decimal("333"))
- 
     def test_absolute_property_limits(self):
         """Test absolute limits set in config for the properties
         are used"""
@@ -824,6 +832,11 @@ class TestDimmensionParam(TestCase):
         # Crossing max/min values
         with self.assertRaises(ValueError):
             DimmensionParam(max=Decimal("12"), min=Decimal("13"))
+
+        # Test max_decimals must be smaller or equal to max_digits
+        DecimalParam(max_digits=2, max_decimals=2)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=2, max_decimals=3)
 
         # Types
         with self.assertRaises(ValueError):

@@ -39,5 +39,5 @@ class TestConf(TestCase):
         self.assertTrue(settings.PARAM_DIMMENSION_MAX_DECIMALS>0)
 
         # Strings
-        self.assertTrue(settings.PARAM_STRING_MAX_LENGTH>0)
+        self.assertTrue(settings.PARAM_TEXT_MAX_LENGTH>0)
      

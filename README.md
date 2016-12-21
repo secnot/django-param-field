@@ -171,33 +171,40 @@ fieldname: type-> property: value
 
 ## Configuration
 
-The absolute limits for the fields are configurable through **settings.py** these are
-hard limits, so if for example **PARAM_INT_MAX** is 5000 creating a new Integer field 
-where max or default properties values are bigger will fail.
+The absolute limits for the fields properties are configurable through **settings.py** 
+these are hard limits, so if for example **PARAM_INT_MAX** is 5000 creating a new Integer 
+field where **max** or **min** properties values are bigger will fail.
 
 ``` python
     # This are the default absolute limits for each field / field property
+
+	# Max lengths for label and help_text strings
     PARAM_LABEL_MAX_LENGTH = 40
     PARAM_HELP_TEXT_MAX_LENGTH = 200
 
-    # Itegers
+    # Max and Min integer values, these have been chosen so integers don't cause
+	# problems when stored in any DB
     PARAM_INT_MAX =  2147483647
     PARAM_INT_MIN = -2147483648
 
-    # Decimal
-    PARAM_DECIMAL_MAX = Decimal("9999999999999999.9999") 
-    PARAM_DECIMAL_MIN = Decimal("-9999999999999999.9999")
+	# The maximum number of digits allowed and the max decimal places
     PARAM_DECIMAL_MAX_DIGITS = 20
     PARAM_DECIMAL_MAX_DECIMALS = 4
 
-    # Dimmension
-    PARAM_DIMMENSION_MAX = Decimal("99999999.9999")
-    PARAM_DIMMENSION_MIN = Decimal("0.0")
+    # Decimal max and min (must have valid number of digits/decimals)
+    PARAM_DECIMAL_MAX = Decimal("9999999999999999.9999") 
+    PARAM_DECIMAL_MIN = Decimal("-9999999999999999.9999")
+
+	# Dimmension digits/decimals
     PARAM_DIMMENSION_MAX_DIGITS = 12
     PARAM_DIMMENSION_MAX_DECIMALS = 4
 
-    # Strings
-    PARAM_STRING_MAX_LENGTH = 300
+    # Dimmension max and min
+    PARAM_DIMMENSION_MAX = Decimal("99999999.9999")
+    PARAM_DIMMENSION_MIN = Decimal("0.0")
+
+    # Text/TextArea max length
+    PARAM_TEXT_MAX_LENGTH = 300
 ```
 
 ## Testing
