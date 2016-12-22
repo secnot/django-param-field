@@ -137,8 +137,8 @@ Each ParamField can have one or more fields with the following syntax
 fieldname: type-> property: value
 ```
 
-* **fieldname** - A lower case name including numbers and underscores,
-	it must start with a letter and has a max length of 30 characters.
+* **fieldname** - A lowercase name starting by a letter and followed by letters, numbers, 
+	and/or underscores. The default max name length is 30 characters.
 
 * **type** - One of the supported field types (All starting with uppercase)    
 	* Bool
