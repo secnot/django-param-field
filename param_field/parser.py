@@ -108,7 +108,7 @@ lst = Group(lbrack+lst_elem+ZeroOrMore(comma+lst_elem)+Optional(comma)+rbrack)\
 
 
 
-identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=30)
+identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=settings.PARAM_NAME_MAX_LENGTH)
 
 
 key = oneOf("default min_length max_length min max help_text label hidden odd even choices required max_digits max_decimals")\

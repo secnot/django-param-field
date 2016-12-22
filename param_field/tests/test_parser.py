@@ -472,3 +472,11 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].label, '')
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].required, True)
+
+
+    def test_param_limits(self):
+        # Test max name length
+        p = parse_fields('{}: Bool'.format("a"*settings.PARAM_NAME_MAX_LENGTH))
+
+        with self.assertRaises(ParseException):
+            p = parse_fields('{}: Bool'.format("a"*settings.PARAM_NAME_MAX_LENGTH+"b"))

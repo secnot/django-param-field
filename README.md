@@ -182,6 +182,7 @@ default values:
 # Max lengths for label and help_text strings
 PARAM_LABEL_MAX_LENGTH = 40
 PARAM_HELP_TEXT_MAX_LENGTH = 200
+PARAM_NAME_MAX_LENGTH = 30
 
 # Max and Min integer values, these have been chosen so integers don't cause
 # problems when stored in any DB

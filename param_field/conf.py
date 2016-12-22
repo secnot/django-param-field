@@ -23,6 +23,7 @@ class Settings(AppSettings):
     # This are the absolute limits for all fields
     PARAM_LABEL_MAX_LENGTH = 40
     PARAM_HELP_TEXT_MAX_LENGTH = 200
+    PARAM_NAME_MAX_LENGTH = 30
 
     # Itegers
     PARAM_INT_MAX =  2147483647
@@ -40,7 +41,7 @@ class Settings(AppSettings):
     PARAM_DIMMENSION_MAX_DIGITS = 12
     PARAM_DIMMENSION_MAX_DECIMALS = 4
 
-    # Strings
+    # Text/TextArea
     PARAM_TEXT_MAX_LENGTH = 300
     
 

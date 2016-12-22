@@ -21,6 +21,7 @@ class TestConf(TestCase):
         # This are the absolute limits for all fields
         self.assertTrue(settings.PARAM_LABEL_MAX_LENGTH>0)
         self.assertTrue(settings.PARAM_HELP_TEXT_MAX_LENGTH>0)
+        self.assertTrue(settings.PARAM_NAME_MAX_LENGTH>0)
 
         # Itegers
         self.assertTrue(settings.PARAM_INT_MAX>0)
