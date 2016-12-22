@@ -150,7 +150,7 @@ fieldname: type-> property: value
 	* File
 	* Image
 
-* **property** - One or more of the properties accepted by the field type
+* **property** - One or more of the properties supported by the field type
 	followed by a value.
 	* ALL: hidden. required, label, help_text
 	* Bool: default
