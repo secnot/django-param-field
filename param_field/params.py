@@ -21,7 +21,8 @@ class ParamDict(OrderedDict):
         from .parser import parse_fields # Solve circular import
         super(ParamDict, self).__init__()
 
-        self._original_source = fields
+        # Store source used to generate ParamDict
+        self._source = fields
 
         if parse:
             f = parse_fields(fields or '', file_support)
@@ -105,8 +106,8 @@ class ParamDict(OrderedDict):
         return dict_str
 
     def __str__(self):
-        if self._original_source:
-            return self._original_source
+        if self._source:
+            return self._source
         else:
             # Generate from fields
             return '\n'.join(["{}:{}"\
