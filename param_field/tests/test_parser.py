@@ -106,11 +106,11 @@ class TestParserBase(TestCase):
 
         # Test min and max lengths
         parse_fields("a: Bool")
-        parse_fields("thirty_character_long_name1111: Bool")
+        parse_fields("{}: Bool".format("a"*settings.PARAM_NAME_MAX_LENGTH))
         with self.assertRaises(ParseException):
             parse_fields(": Bool")
         with self.assertRaises(ParseException):
-            parse_fields("more_than_thirty_characters_lon: Bool")
+            parse_fields("{}: Bool".format("a"*(settings.PARAM_NAME_MAX_LENGTH+1)))
 
     def test_string_parsing(self):
         """Test string quotes format"""
