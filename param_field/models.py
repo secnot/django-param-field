@@ -1,9 +1,11 @@
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.core import validators
 from django.db import models
+from django import forms
 from pyparsing import ParseBaseException
 from .params import ParamDict
-from .validators import ParamValidator
+from .validators import ParamValidator, ParamLengthValidator
 from .conf import settings
 
 
@@ -17,6 +19,7 @@ class ParamField(models.TextField):
         """
         Arguments:
             file_support(bool): Enable or disable support for file fields.
+                default is True
         """
        
         if kwargs.get('max_length', None) is None:
@@ -25,8 +28,8 @@ class ParamField(models.TextField):
         kwargs['blank'] = True
         
         self._file_support = kwargs.pop('file_support', True)
-    
         super(ParamField, self).__init__(*args, **kwargs)
+        self.validators.append(ParamLengthValidator(self.max_length))
 
     def deconstruct(self):
         """Cleanup of added kwargs"""
@@ -34,7 +37,11 @@ class ParamField(models.TextField):
 
         if self.max_length == settings.PARAM_FIELD_MAX_LENGTH:
             del kwargs['max_length']
+
         del kwargs['blank']
+
+        if not self._file_support:
+            kwargs['file_support'] = False
 
         return name, path, args, kwargs
 
@@ -71,7 +78,10 @@ class ParamField(models.TextField):
 
     def formfield(self, **kwargs):
         """So validation can be added"""
-        defaults = {'validators': [ParamValidator(self._file_support),]}
+        defaults = {
+                'validators': [ParamValidator(self._file_support)], 
+                'widget': forms.Textarea,
+                'max_length': self.max_length}
         defaults.update(kwargs)
         return super(ParamField, self).formfield(**defaults)
 
