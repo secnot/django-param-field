@@ -1,0 +1,2 @@
+# Pandoc to generate README.rst pypi page
+pypandoc
