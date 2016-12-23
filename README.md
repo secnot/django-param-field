@@ -207,6 +207,9 @@ PARAM_DIMMENSION_MIN = Decimal("0.0")
 
 # Text/TextArea max length
 PARAM_TEXT_MAX_LENGTH = 300
+
+# max_length used by ParamField when it isn't supplied
+PARAM_FIELD_MAX_LENGTH = 3000
 ```
 
 ## Testing

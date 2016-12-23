@@ -4,9 +4,8 @@ from django.db import models
 from pyparsing import ParseBaseException
 from .params import ParamDict
 from .validators import ParamValidator
+from .conf import settings
 
-
-MAX_PARAM_FIELD_LENGTH = 3000
 
 # Create your models here.
 
@@ -19,7 +18,10 @@ class ParamField(models.TextField):
         Arguments:
             file_support(bool): Enable or disable support for file fields.
         """
-        kwargs['max_length'] = MAX_PARAM_FIELD_LENGTH
+       
+        if kwargs.get('max_length', None) is None:
+            kwargs['max_length'] = settings.PARAM_FIELD_MAX_LENGTH
+
         kwargs['blank'] = True
         
         self._file_support = kwargs.pop('file_support', True)
@@ -27,9 +29,13 @@ class ParamField(models.TextField):
         super(ParamField, self).__init__(*args, **kwargs)
 
     def deconstruct(self):
+        """Cleanup of added kwargs"""
         name, path, args, kwargs = super().deconstruct()
-        del kwargs['max_length']
+
+        if self.max_length == settings.PARAM_FIELD_MAX_LENGTH:
+            del kwargs['max_length']
         del kwargs['blank']
+
         return name, path, args, kwargs
 
     def from_db_value(self, value, expression, connection, context):
@@ -39,10 +45,10 @@ class ParamField(models.TextField):
         try:
             return ParamDict(value, self._file_support)
         except ParseBaseException as err:
-            # Couldn't parse form definition return empty one
+            # Couldn't parse form definition return empty dict
             return ParamDict(value, self._file_support, parse=False)
         except ValueError as err:
-            # Couldn't parse form definition return empty one
+            # Couldn't parse form definition return empty dict
             return ParamDict(value, self._file_support, parse=False)
 
     def get_prep_value(self, value):

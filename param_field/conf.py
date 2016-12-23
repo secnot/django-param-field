@@ -17,7 +17,6 @@ class AppSettings(BaseSettings):
 
 
 
-
 class Settings(AppSettings):
 
     # This are the absolute limits for all fields
@@ -43,6 +42,9 @@ class Settings(AppSettings):
 
     # Text/TextArea
     PARAM_TEXT_MAX_LENGTH = 300
-    
+
+    # Max_length used by ParamField when it isn't supplied
+    PARAM_FIELD_MAX_LENGTH = 3000
+
 
 settings = Settings()

@@ -1,12 +1,6 @@
 from django.test import TestCase, override_settings
 from param_field.conf import settings
 
-from django.core.exceptions import ValidationError
-
-from django.conf import settings as django_settings
-
-from param_field.params import IntegerParam
-
 
 class TestConf(TestCase):
 
@@ -16,8 +10,9 @@ class TestConf(TestCase):
         """Test setting value overrides default values"""
         self.assertEqual(settings.PARAM_INT_MAX, 3)
 
+
     def test_default_config(self):
-        """Load default options when not set in settings.py"""
+        """Test default options are used when not set in settings.py"""
         # This are the absolute limits for all fields
         self.assertTrue(settings.PARAM_LABEL_MAX_LENGTH>0)
         self.assertTrue(settings.PARAM_HELP_TEXT_MAX_LENGTH>0)
@@ -41,4 +36,6 @@ class TestConf(TestCase):
 
         # Strings
         self.assertTrue(settings.PARAM_TEXT_MAX_LENGTH>0)
-     
+
+        # Field's default max_length
+        self.assertTrue(settings.PARAM_FIELD_MAX_LENGTH>0)
