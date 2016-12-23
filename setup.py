@@ -5,14 +5,14 @@ try:
     from pypandoc import convert
 
     def read_md(f):
-        return convert(f, 'rst')
+        description = convert(f, 'rst')
+        return description.replace("\r","")
+
 except ImportError:
     print("warning: pypandoc module not found, could not convert Markdown to RST")
 
     def read_md(f):
         return open(f, 'r', encoding='utf-8').read()
-
-
 
 setup(
 	name='django-param-field',
