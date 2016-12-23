@@ -171,10 +171,11 @@ fieldname: type-> property: value
 
 ## Configuration
 
-The absolute limits for the fields properties are configurable through **settings.py** 
-these are hard limits, so if for example **PARAM_INT_MAX** is 5000 creating a new Integer 
-field where **max** or **min** properties values are bigger will fail. These are the 
-default values:
+The absolute limits for the fields properties are configurable through **settings.py**, 
+for example **PARAM_INT_MAX** controls the max allowed value for integer **max** property,
+so creating a new Integer field where **max** is bigger will fail.  
+These are the available options with their default value:
+
 
 ``` python
 # settings.py
