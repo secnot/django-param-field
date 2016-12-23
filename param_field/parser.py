@@ -67,6 +67,7 @@ def propToDict(tokens):
     return prop_dict
 
 def lstToList(tokens):
+    """Convert list of list of tokes to python list"""
     l = list()
     
     for token in tokens[0]:
