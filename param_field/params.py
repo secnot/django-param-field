@@ -5,7 +5,8 @@ from decimal import Decimal
 from numbers import Number
 from collections import OrderedDict
 import json
-from .limits import *
+from .conf import settings
+
 
 class ParamDict(OrderedDict):
   
@@ -20,7 +21,8 @@ class ParamDict(OrderedDict):
         from .parser import parse_fields # Solve circular import
         super(ParamDict, self).__init__()
 
-        self._original_source = fields
+        # Store source used to generate ParamDict
+        self._source = fields
 
         if parse:
             f = parse_fields(fields or '', file_support)
@@ -29,15 +31,7 @@ class ParamDict(OrderedDict):
 
         for name, field in f.items():
             self[name] = field
-
-    def __str__(self):
-        if self._original_source:
-            return self._original_source
-        else:
-            # Generate from fields
-            return '\n'.join(["{}:{}"\
-                .format(name, str(param)) for name, param in self.items()])
-
+    
     def form(self, *args, **kwargs):
         """Return a form containig all parameters stored in ParamDict
         Arguments:
@@ -55,52 +49,30 @@ class ParamDict(OrderedDict):
         kwargs['params'] = self
         return ParamInputForm(*args, **kwargs)
 
-    def serialize(self, request):
-        """Convert each value to its representation so it can be easily stored
-
-        Argumens:
-            request (dictionary): value for each parameter.
-        """
-        serialized = {}
-        for name, value in request.items():
-            serialized[name] = self[name].serialize_value(value)
-        return serialized
-
-    def deserialize(self, request):
-        """The oposite step to 'request_to_dict' convert all values from its 
-        representation to its real python value, that can be later be validated.
-        
-        Arguments:
-            request (dict): Request dict containing serialized values
-        """
-        deserialized = {}
-        for name, value in request.items():
-            deserialized[name] = self[name].deserialize_value(value)
-        return deserialized
-
     def validate(self, request):
         """
-        Validate request against ParamDict parameters.
+        Validate request against ParamDict parameters
+
+        A request is valid if there is a valid value for each required parameter 
+        or in it absence if the parameter has a default value.
 
         Arguments:
-            request (dict):
+            request (dict): Dictionary containing (param_name: value)
         """
         # Check no unknown parameter present in the request
         for name, value in request.items():
             if self.get(name, None) is None:
-                raise ValidationError("Parameter '{}' does not exists"\
-                        .format(name))
+                raise ValidationError("Unknown parameter '{}'".format(name))
 
         # Validate request against parameter definitions
         for name, value in self.items():
-            # TODO if no value was provided if there is a default value the 
-            # request is valid
+            # Check a valid value was provided for each required parameter
+            # without a default value.
             try:
                 value = request.get(name, None)
                 param = self[name]
-                if value is None:
-                    default = param.get_default()
-                    if default is None:
+                if param.required and value is None:
+                    if param.get_default() is None:
                         raise ValidationError("No value supplied for {}"\
                                 .format(name))
                 else:
@@ -110,7 +82,7 @@ class ParamDict(OrderedDict):
 
     def add_defaults(self, request):
         """
-        Add missing parameters using default values.
+        Add default values to missing parameters when available.
 
         Arguments:
             request (dict): dict containing parameter values
@@ -127,18 +99,20 @@ class ParamDict(OrderedDict):
 
         return with_defaults
 
-    def param_count(self):
-        """Returns number of parameters in the dictionary, constants
-        are not counted.
-        
-        Returns:
-            int
-        """
-        params = 0
-        for name, value in self.items():
-            if isinstance(value, Param):
-                params += 1
-        return params
+        dict_str = ""
+        for name, param in self.items():        
+            dict_str += name+':'+str(param)+'\n'
+
+        return dict_str
+
+    def __str__(self):
+        if self._source:
+            return self._source
+        else:
+            # Generate from fields
+            return '\n'.join(["{}:{}"\
+                .format(name, str(param)) for name, param in self.items()])
+
 
 # Property -> allowed types | limits
 
@@ -176,7 +150,7 @@ class Param(object):
 
     def _init_label(self, value):
         """Initialize Param for label property"""
-        if len(value)>LABEL_MAX_LENGTH:
+        if len(value)>settings.PARAM_LABEL_MAX_LENGTH:
             raise ValueError("'{}' label too long".format(value))
         self.label = value
 
@@ -193,7 +167,7 @@ class Param(object):
             raise ValueError('A default value must be provided for hidden parameters')
 
     def _init_help_text(self, value):
-        if len(value)>HELP_TEXT_MAX_LENGTH:
+        if len(value)>settings.PARAM_HELP_TEXT_MAX_LENGTH:
             raise ValueError("help text too long".format(value))
         self.help_text = value
 
@@ -277,10 +251,7 @@ class Param(object):
             return False
 
     def deserialize_value(self, value):
-        """Convert from value representation to the actual value object
-        for example: slug string TO model instance
-        USED BY FOREIGN KEY AND FILE PARAMS  
-        """
+        """Convert from value representation to the actual value object"""
         if not type(value) == self.native_type:
             err = "Expected '{}' received '{}'"\
                 .format(self.native_type.__name__, type(value).__name__)
@@ -288,9 +259,7 @@ class Param(object):
         return value
 
     def serialize_value(self, value):
-        """to_python reverse step
-        USED BY FOREIGN KEY AND FILE PARAMS 
-        """
+        """to_python reverse step"""
         return value
 
     def value_to_str(self, value):
@@ -340,11 +309,17 @@ class NumberMixin(object):
     def _init_min(self, value):
         if not self.is_valid(self.native_type(value)):
             raise ValueError("Invalid 'min' value")
+        if value > self.max:
+            raise ValueError("Invalid 'min' value, must be less or equal to 'max'")
+
         self.min = value
 
     def _init_max(self, value):
         if not self.is_valid(self.native_type(value)):
             raise ValueError("Invalid 'max' value")
+        if value < self.min:
+            raise ValueError("Invalid 'max' value, must be greater or equal to 'min'")
+
         self.max = value
 
     def _validate_min(self, value):
@@ -367,16 +342,23 @@ class NumberMixin(object):
         if self.odd and value%2==0:
              raise ValidationError("Value must be odd")
 
+
 class StringMixin(object):
 
     def _init_max_length(self, value):
-        if value > STRING_MAX_LENGTH or value < 0:
+        if value > settings.PARAM_TEXT_MAX_LENGTH or value < 0:
             raise ValueError("Invalid 'max_length' value")
+        if value < self.min_length:
+            raise ValueError("Invalid 'max_length' value, must be greater or equal to 'min_length'")
+
         self.max_length = value
     
     def _init_min_length(self, value):
-        if value > STRING_MAX_LENGTH or value < 0:
+        if value > settings.PARAM_TEXT_MAX_LENGTH or value < 0:
             raise ValueError("Invalid 'min_length' value")
+        if value > self.max_length:
+            raise ValueError("Invalid 'min_length' value, must be less or equal to 'max_length'")
+
         self.min_length = value
     
     def _validate_max_length(self, value):
@@ -410,8 +392,8 @@ class IntegerParam(Param, NumberMixin):
         ('required', bool, True),
         ('even', bool, False),
         ('odd', bool, False),
-        ('min', int, INT_MIN),
-        ('max', int, INT_MAX),
+        ('min', int, settings.PARAM_INT_MIN),
+        ('max', int, settings.PARAM_INT_MAX),
         ('choices', list, None),
         ('default', int, None),
         ('hidden', bool, False)]
@@ -423,13 +405,16 @@ class DecimalParam(Param, NumberMixin):
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True),
-        ('max_digits', int, DECIMAL_MAX_DIGITS),
-        ('max_decimals', int, DECIMAL_MAX_DECIMALS),
-        ('min', Decimal, DECIMAL_MIN),
-        ('max', Decimal, DECIMAL_MAX),
+        ('max_digits', int, settings.PARAM_DECIMAL_MAX_DIGITS),
+        ('max_decimals', int, settings.PARAM_DECIMAL_MAX_DECIMALS),
+        ('min', Decimal, settings.PARAM_DECIMAL_MIN),
+        ('max', Decimal, settings.PARAM_DECIMAL_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
         ('hidden', bool, False)]
+
+    abs_max_digits = settings.PARAM_DECIMAL_MAX_DIGITS
+    abs_max_decimals = settings.PARAM_DECIMAL_MAX_DECIMALS
 
     @staticmethod
     def _decimal_digits(dec):
@@ -443,18 +428,24 @@ class DecimalParam(Param, NumberMixin):
 
     def _init_max_digits(self, value):
         if value <= 0:
-            raise ValueError("Invalid 'max_digits' must be greater than zero")
+            raise ValueError("Invalid 'max_digits' value, must be greater than zero")
 
-        if value > DECIMAL_MAX_DIGITS:
-            raise ValueError("Invalid 'max_digits' too big")
+        if value > self.abs_max_digits:
+            raise ValueError("Invalid 'max_digits' value,  too big (max: {})".format(
+                self.abs_max_digits))
         self.max_digits = value
     
     def _init_max_decimals(self, value):
         if value < 0:
-            raise ValueError("Invalid 'max_decimals' must be greater or equal to zero")
+            raise ValueError("Invalid 'max_decimals' value, must be greater or equal to zero")
 
-        if value > DECIMAL_MAX_DECIMALS:
-            raise ValueError("Invalid 'max_decimals' too big")
+        if value > self.abs_max_decimals:
+            raise ValueError("Invalid 'max_decimals' value, too big (max: {})".format(
+                    self.abs_max_decimals))
+
+        if value >self.max_digits:
+            raise ValueError("Invalid 'max_decimas' must be smaller or equal to 'max_digits'")
+
         self.max_decimals = value
 
     def _validate_max_digits(self, value):   
@@ -472,13 +463,16 @@ class DimmensionParam(DecimalParam):
         ('label', str, ''),
         ('help_text', str, ''),
         ('required', bool, True),
-        ('max_digits', int, DECIMAL_MAX_DIGITS),
-        ('max_decimals', int, DECIMAL_MAX_DECIMALS),
-        ('min', Decimal, Decimal("0")),
-        ('max', Decimal, DECIMAL_MAX),
+        ('max_digits', int, settings.PARAM_DIMMENSION_MAX_DIGITS),
+        ('max_decimals', int, settings.PARAM_DIMMENSION_MAX_DECIMALS),
+        ('min', Decimal, max(Decimal("0"), settings.PARAM_DIMMENSION_MIN)),
+        ('max', Decimal, settings.PARAM_DIMMENSION_MAX),
         ('choices', list, None),
         ('default', Decimal, None),
         ('hidden', bool, False)]
+    
+    abs_max_digits = settings.PARAM_DIMMENSION_MAX_DIGITS
+    abs_max_decimals = settings.PARAM_DIMMENSION_MAX_DECIMALS
 
 class TextParam(Param, StringMixin):
     native_type = str
@@ -488,14 +482,13 @@ class TextParam(Param, StringMixin):
         ('help_text', str, ''),
         ('required', bool, True),
         ('min_length', int, 0),
-        ('max_length', int, STRING_MAX_LENGTH),
+        ('max_length', int, settings.PARAM_TEXT_MAX_LENGTH),
         ('choices', list, None),
         ('default', str, None),
         ('hidden', bool, False)]
 
 class TextAreaParam(TextParam):
     type_name = 'TextArea'
-    #TODO: Custom widget
 
 
 # File Params

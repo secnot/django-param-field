@@ -6,7 +6,8 @@ from collections import OrderedDict
 
 from param_field.parser import parse_fields
 from param_field.params import *
-from param_field.limits import *
+from param_field.conf import settings
+
 
 class TestParserBase(TestCase):
 
@@ -105,11 +106,11 @@ class TestParserBase(TestCase):
 
         # Test min and max lengths
         parse_fields("a: Bool")
-        parse_fields("thirty_character_long_name1111: Bool")
+        parse_fields("{}: Bool".format("a"*settings.PARAM_NAME_MAX_LENGTH))
         with self.assertRaises(ParseException):
             parse_fields(": Bool")
         with self.assertRaises(ParseException):
-            parse_fields("more_than_thirty_characters_lon: Bool")
+            parse_fields("{}: Bool".format("a"*(settings.PARAM_NAME_MAX_LENGTH+1)))
 
     def test_string_parsing(self):
         """Test string quotes format"""
@@ -135,11 +136,11 @@ class TestParserBase(TestCase):
 
         # Length Limit
         p = parse_fields('name: Text-> default:"{}"'\
-                .format("a"*STRING_MAX_LENGTH))
+                .format("a"*settings.PARAM_TEXT_MAX_LENGTH))
 
         with self.assertRaises(ParseBaseException):
             parse_fields('name: Text-> default:"{}"'\
-                .format("a"*(STRING_MAX_LENGTH+1)))
+                .format("a"*(settings.PARAM_TEXT_MAX_LENGTH+1)))
 
     def test_boolean_parsing(self):
         """Test wich boolean strings are accepted"""
@@ -194,18 +195,22 @@ class TestParserBase(TestCase):
         self.assertEqual(p['holes'].default, -1)
 
         # max/min limits
-        p = parse_fields('holes: Integer->default:999999')
-        self.assertEqual(p['holes'].default, 999999)
+        p = parse_fields('holes: Integer->default:{}'.format(settings.PARAM_INT_MAX))
+        self.assertEqual(p['holes'].default, settings.PARAM_INT_MAX)
 
-        p = parse_fields('holes: Integer->default:-999999')
-        self.assertEqual(p['holes'].default, -999999)
+        p = parse_fields('holes: Integer->default:{}'.format(settings.PARAM_INT_MIN))
+        self.assertEqual(p['holes'].default, settings.PARAM_INT_MIN)
 
         with self.assertRaises(ParseBaseException):
-            parse_fields('holes: Integer->default:1000000')
+            parse_fields('holes: Integer->default:{}'.format(settings.PARAM_INT_MAX+1))
         
         with self.assertRaises(ParseBaseException):
-            parse_fields('holes: Integer->default:-1000000')
-        
+            parse_fields('holes: Integer->default:{}'.format(settings.PARAM_INT_MIN-1))
+       
+        # Try overflow integer
+        long_long_int = "9"+"9"*10000
+        with self.assertRaises(ParseBaseException):
+            parse_fields('holes: Integer->default:{}'.format(long_long_int))
     
     def test_decimal_parsing(self):
         """Test valid decimal values"""
@@ -233,17 +238,17 @@ class TestParserBase(TestCase):
             parse_fields('width: Decimal->default:33')
         
         # max/min limits
-        p = parse_fields('width: Decimal->default:{}'.format(DECIMAL_MAX))
-        self.assertEqual(p['width'].default, DECIMAL_MAX)
+        p = parse_fields('width: Decimal->default:{}'.format(settings.PARAM_DECIMAL_MAX))
+        self.assertEqual(p['width'].default, settings.PARAM_DECIMAL_MAX)
 
-        p = parse_fields('width: Decimal->default:{}'.format(DECIMAL_MIN))
-        self.assertEqual(p['width'].default, DECIMAL_MIN)
+        p = parse_fields('width: Decimal->default:{}'.format(settings.PARAM_DECIMAL_MIN))
+        self.assertEqual(p['width'].default, settings.PARAM_DECIMAL_MIN)
 
         with self.assertRaises(ParseBaseException):
-            parse_fields('width: Decimal->default:{}'.format(DECIMAL_MAX+1))
+            parse_fields('width: Decimal->default:{}'.format(settings.PARAM_DECIMAL_MAX+1))
         
         with self.assertRaises(ParseBaseException):
-            parse_fields('width: Decimal->default:{}'.format(DECIMAL_MIN-1))
+            parse_fields('width: Decimal->default:{}'.format(settings.PARAM_DECIMAL_MIN-1))
      
         # max_digits and max_decimals
         p = parse_fields('width: Decimal->max_digits: 4 default:999.9')
@@ -253,6 +258,11 @@ class TestParserBase(TestCase):
         p = parse_fields('width: Decimal->max_decimals: 2 default:999.99')
         with self.assertRaises(Exception):
             p = parse_fields('width: Decimal->max_decimals: 1 default:9.999')
+
+        # Try overflow decimal
+        long_long_decimal = "9"*10000+'.'+"9"*10000
+        with self.assertRaises(ParseBaseException):
+            parse_fields('width: Decimal-> default:{}'.format(long_long_decimal))
 
     def test_empty_choices_list(self):
         """Choices list must contain at least one element"""
@@ -412,7 +422,7 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max_length, STRING_MAX_LENGTH)
+        self.assertEqual(p['par'].max_length, settings.PARAM_TEXT_MAX_LENGTH)
         self.assertEqual(p['par'].min_length, 0)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
@@ -422,8 +432,8 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, INT_MAX)
-        self.assertEqual(p['par'].min, INT_MIN)
+        self.assertEqual(p['par'].max, settings.PARAM_INT_MAX)
+        self.assertEqual(p['par'].min, settings.PARAM_INT_MIN)
         self.assertEqual(p['par'].even, False)
         self.assertEqual(p['par'].odd, False) 
         self.assertEqual(p['par'].hidden, False)
@@ -434,10 +444,10 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, DECIMAL_MAX)
-        self.assertEqual(p['par'].min, DECIMAL_MIN)
-        self.assertEqual(p['par'].max_digits, DECIMAL_MAX_DIGITS)
-        self.assertEqual(p['par'].max_decimals, DECIMAL_MAX_DECIMALS)
+        self.assertEqual(p['par'].max, settings.PARAM_DECIMAL_MAX)
+        self.assertEqual(p['par'].min, settings.PARAM_DECIMAL_MIN)
+        self.assertEqual(p['par'].max_digits, settings.PARAM_DECIMAL_MAX_DIGITS)
+        self.assertEqual(p['par'].max_decimals, settings.PARAM_DECIMAL_MAX_DECIMALS)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
 
@@ -446,10 +456,10 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].default, None)
         self.assertEqual(p['par'].choices, None)
-        self.assertEqual(p['par'].max, DECIMAL_MAX)
+        self.assertEqual(p['par'].max, settings.PARAM_DIMMENSION_MAX)
         self.assertEqual(p['par'].min, Decimal('0.0'))
-        self.assertEqual(p['par'].max_digits, DECIMAL_MAX_DIGITS)
-        self.assertEqual(p['par'].max_decimals, DECIMAL_MAX_DECIMALS)
+        self.assertEqual(p['par'].max_digits, settings.PARAM_DIMMENSION_MAX_DIGITS)
+        self.assertEqual(p['par'].max_decimals, settings.PARAM_DIMMENSION_MAX_DECIMALS)
         self.assertEqual(p['par'].hidden, False)
         self.assertEqual(p['par'].required, True)
         
@@ -462,3 +472,11 @@ class TestParserBase(TestCase):
         self.assertEqual(p['par'].label, '')
         self.assertEqual(p['par'].help_text, '')
         self.assertEqual(p['par'].required, True)
+
+
+    def test_param_limits(self):
+        # Test max name length
+        p = parse_fields('{}: Bool'.format("a"*settings.PARAM_NAME_MAX_LENGTH))
+
+        with self.assertRaises(ParseException):
+            p = parse_fields('{}: Bool'.format("a"*settings.PARAM_NAME_MAX_LENGTH+"b"))

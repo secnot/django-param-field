@@ -48,7 +48,7 @@ def rangeCheck(minval=None, maxval=None):
 
     return rangeCheckParseAction    
 
-def lengthCheck(max_length=STRING_MAX_LENGTH):
+def lengthCheck(max_length=settings.PARAM_TEXT_MAX_LENGTH):
 
     def lengthCheckParseAction(string, loc, tokens):
         if len(tokens[0]) > max_length:
@@ -67,6 +67,7 @@ def propToDict(tokens):
     return prop_dict
 
 def lstToList(tokens):
+    """Convert list of list of tokes to python list"""
     l = list()
     
     for token in tokens[0]:
@@ -93,10 +94,10 @@ number = Word(nums)
 # Define data primitives and limits
 integer = Combine(Optional(plusorminus)+number)\
     .setName("integer").setParseAction(cvtInt)\
-    .addParseAction(rangeCheck(INT_MIN, INT_MAX))
+    .addParseAction(rangeCheck(settings.PARAM_INT_MIN, settings.PARAM_INT_MAX))
 real = Combine(Optional(plusorminus)+number+"."+number)\
     .setName("real").setParseAction(cvtDec)\
-    .addParseAction(rangeCheck(DECIMAL_MIN, DECIMAL_MAX))
+    .addParseAction(rangeCheck(settings.PARAM_DECIMAL_MIN, settings.PARAM_DECIMAL_MAX))
 string = QuotedString('"', escChar='\\')\
     .setName("string")\
     .addParseAction(lengthCheck())
@@ -108,7 +109,7 @@ lst = Group(lbrack+lst_elem+ZeroOrMore(comma+lst_elem)+Optional(comma)+rbrack)\
 
 
 
-identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=30)
+identifier = ~reserved_keywords+Word(lowercase, lowercasenums+"_", min=1, max=settings.PARAM_NAME_MAX_LENGTH)
 
 
 key = oneOf("default min_length max_length min max help_text label hidden odd even choices required max_digits max_decimals")\

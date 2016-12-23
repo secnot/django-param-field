@@ -125,6 +125,10 @@ class CustomProductFormView(FormView):
 		...
 ```
 
+Read this [blog post](http://www.secnot.com/django-param-field-en.html) for a longer
+tutorial that includes an example on how to handle File and Image fields.
+
+
 ## Syntax
 
 Each ParamField can have one or more fields with the following syntax
@@ -133,8 +137,8 @@ Each ParamField can have one or more fields with the following syntax
 fieldname: type-> property: value
 ```
 
-* **fieldname** - A lower case name including numbers and underscores,
-	it must start with a letter and has a max length of 30 characters.
+* **fieldname** - A lowercase name starting with a letter and followed by letters, numbers, 
+	and/or underscores. The default max name length is 30 characters.
 
 * **type** - One of the supported field types (All starting with uppercase)    
 	* Bool
@@ -146,14 +150,14 @@ fieldname: type-> property: value
 	* File
 	* Image
 
-* **property** - One or more of the properties accepted by the field type
+* **property** - One or more of the properties supported by the field type
 	followed by a value.
-	* ALL: hidden required label help_text
+	* ALL: hidden. required, label, help_text
 	* Bool: default
-	* Integer: default even odd max min choices
-	* Decimal: default max min choices max_digits max_decimals
-	* Text: default max_length min_length choices
-	* TextArea: default max_length
+	* Integer: default, even, odd, max, min, choices
+	* Decimal: default, max, min, choices, max_digits, max_decimals
+	* Text: default, max_length, min_length, choices
+	* TextArea: default, max_length
 	* File: (doesn't support hidden)
 	* Image: (doesn't support hidden) 
 
@@ -163,6 +167,52 @@ fieldname: type-> property: value
 	* Integer - 44
 	* String - "string with scape \\"chars\\" "
 	* Value list - [value, value, value]
+
+
+## Configuration
+
+The absolute limits for the fields properties are configurable through **settings.py**, 
+for example **PARAM_INT_MAX** controls the max allowed value for integer **max** property,
+so creating a new Integer field where **max** is bigger will fail.  
+
+These are the available options with their default value:
+
+
+``` python
+# settings.py
+
+# Max lengths for label and help_text strings
+PARAM_LABEL_MAX_LENGTH = 40
+PARAM_HELP_TEXT_MAX_LENGTH = 200
+PARAM_NAME_MAX_LENGTH = 30
+
+# Max and Min integer values, these have been chosen so integers don't cause
+# problems when stored in any DB
+PARAM_INT_MAX =  2147483647
+PARAM_INT_MIN = -2147483648
+
+# The maximum number of digits allowed and the max decimal places
+PARAM_DECIMAL_MAX_DIGITS = 20
+PARAM_DECIMAL_MAX_DECIMALS = 4
+
+# Decimal max and min (must have valid number of digits/decimals)
+PARAM_DECIMAL_MAX = Decimal("9999999999999999.9999") 
+PARAM_DECIMAL_MIN = Decimal("-9999999999999999.9999")
+
+# Dimmension digits/decimals
+PARAM_DIMMENSION_MAX_DIGITS = 12
+PARAM_DIMMENSION_MAX_DECIMALS = 4
+
+# Dimmension max and min
+PARAM_DIMMENSION_MAX = Decimal("99999999.9999")
+PARAM_DIMMENSION_MIN = Decimal("0.0")
+
+# Text/TextArea max length
+PARAM_TEXT_MAX_LENGTH = 300
+
+# max_length used by ParamField when it isn't supplied
+PARAM_FIELD_MAX_LENGTH = 3000
+```
 
 ## Testing
 
@@ -175,11 +225,10 @@ $ python manage.py test param_field
 ## References
 
 * [Domain speficific languages python slide](http://es.slideshare.net/Siddhi/creating-domain-specific-languages-in-python)
-* [Small django-param-field tutorial](http://www.secnot.com/django-param-field-en.html) with a longer example than the
-README
+* [Small django-param-field tutorial](http://www.secnot.com/django-param-field-en.html) with a longer example than the one
+in this README.
 
 ## TODO
 
 * Better parser error messages
-* Better settings managment into settings.py
 

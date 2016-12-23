@@ -3,27 +3,20 @@ from django.core.exceptions import ValidationError
 from unittest.mock import patch
 from param_field.params import *
 from param_field.forms import ParamInputForm
-
-from param_field.limits import (INT_MAX, INT_MIN, DECIMAL_MAX, DECIMAL_MIN,
-        DECIMAL_MAX_DIGITS, DECIMAL_MAX_DECIMALS,
-        STRING_MAX_LENGTH, LABEL_MAX_LENGTH, HELP_TEXT_MAX_LENGTH)
-
-
+from param_field.conf import settings
 from decimal import Decimal
 
 class TestParamDict(TestCase):
 
     def test_param_count(self): 
-        """Test param_count returns correct number"""
+        """Test len returns correct parameter number"""
         d = ParamDict("""
             bool:Bool->default:True label:"enable"
             int:Integer->default:44 label:"number of holes" """)
-        self.assertEqual(d.param_count(), 2)
+        self.assertEqual(len(d), 2)
  
         d = ParamDict(""" """)
-        self.assertEqual(d.param_count(), 0)
-
-        #TODO:  Test dict with contants when implemented
+        self.assertEqual(len(d), 0)
 
     def test_validate(self):
         p1 = BoolParam(default=True, label="enable")
@@ -234,32 +227,32 @@ class TestBaseParam(TestCase):
 
     def test_property_limits(self):
         """Test properties limit values default, choices"""
-        TextParam(label="a"*LABEL_MAX_LENGTH)
+        TextParam(label="a"*settings.PARAM_LABEL_MAX_LENGTH)
         with self.assertRaises(ValueError):
-            TextParam(label="b"*(LABEL_MAX_LENGTH+1))
+            TextParam(label="b"*(settings.PARAM_LABEL_MAX_LENGTH+1))
 
-        TextParam(help_text="b"*HELP_TEXT_MAX_LENGTH)
+        TextParam(help_text="b"*settings.PARAM_HELP_TEXT_MAX_LENGTH)
         with self.assertRaises(ValueError):
-            TextParam(help_text="c"*(HELP_TEXT_MAX_LENGTH+1))
+            TextParam(help_text="c"*(settings.PARAM_HELP_TEXT_MAX_LENGTH+1))
 
-        IntegerParam(default=INT_MAX)
+        IntegerParam(default=settings.PARAM_INT_MAX)
         with self.assertRaises(ValueError):
-            IntegerParam(default=INT_MAX+1)
-        IntegerParam(default=INT_MIN)
+            IntegerParam(default=settings.PARAM_INT_MAX+1)
+        IntegerParam(default=settings.PARAM_INT_MIN)
         with self.assertRaises(ValueError):
-            IntegerParam(default=INT_MIN-1)
+            IntegerParam(default=settings.PARAM_INT_MIN-1)
 
-        DecimalParam(choices=[Decimal('12'), DECIMAL_MAX])
+        DecimalParam(choices=[Decimal('12'), settings.PARAM_DECIMAL_MAX])
         with self.assertRaises(ValueError):
-            IntegerParam(choices=[Decimal('12'), DECIMAL_MAX+1])
+            IntegerParam(choices=[Decimal('12'), settings.PARAM_DECIMAL_MAX+1])
 
-        DecimalParam(choices=[Decimal('12'), DECIMAL_MIN])
+        DecimalParam(choices=[Decimal('12'), settings.PARAM_DECIMAL_MIN])
         with self.assertRaises(ValueError):
-            IntegerParam(choices=[Decimal('12'), DECIMAL_MIN-1])
+            IntegerParam(choices=[Decimal('12'), settings.PARAM_DECIMAL_MIN-1])
 
-        TextParam(default="a"*STRING_MAX_LENGTH)
+        TextParam(default="a"*settings.PARAM_TEXT_MAX_LENGTH)
         with self.assertRaises(ValueError):
-            TextParam(default="b"*(STRING_MAX_LENGTH+1))
+            TextParam(default="b"*(settings.PARAM_TEXT_MAX_LENGTH+1))
 
     def test_get_choices(self):
         """Test returns choice-name pair list"""
@@ -282,12 +275,12 @@ class TestBaseParam(TestCase):
             DecimalParam(default=13, choices=[Decimal('13')])
 
         # Test label and help_text max_length
-        DecimalParam(label='a'*LABEL_MAX_LENGTH)
-        DecimalParam(help_text='b'*HELP_TEXT_MAX_LENGTH)
+        DecimalParam(label='a'*settings.PARAM_LABEL_MAX_LENGTH)
+        DecimalParam(help_text='b'*settings.PARAM_HELP_TEXT_MAX_LENGTH)
         with self.assertRaises(ValueError):
-            DecimalParam(label='a'*(LABEL_MAX_LENGTH+1))
+            DecimalParam(label='a'*(settings.PARAM_LABEL_MAX_LENGTH+1))
         with self.assertRaises(ValueError):
-            DecimalParam(help_text='b'*(HELP_TEXT_MAX_LENGTH+1))
+            DecimalParam(help_text='b'*(settings.PARAM_HELP_TEXT_MAX_LENGTH+1))
 
     def test_label_help(self):
         """Test label and help_text"""
@@ -516,7 +509,16 @@ class TestTextParam(TestCase):
         with self.assertRaises(ValueError):
             self.param(min_length=-1)
         with self.assertRaises(ValueError):
-            self.param(max_length=STRING_MAX_LENGTH+1)
+            self.param(max_length=-1)
+        with self.assertRaises(ValueError):
+            self.param(max_length=11, min_length=12)
+
+    def test_max_length_property_limits(self):
+        """Test absolute limits set in config for the properties
+        are used"""
+        self.param(max_length=settings.PARAM_TEXT_MAX_LENGTH)
+        with self.assertRaises(ValueError):
+            self.param(max_length=settings.PARAM_TEXT_MAX_LENGTH+1)
 
     def test_is_valid(self):
         p = self.param(min_length=3,)
@@ -597,14 +599,16 @@ class TestIntegerParam(TestCase):
         # Crossing max/min values
         with self.assertRaises(ValueError):
             IntegerParam(max=12, min=13)
-
-        # Default restrictions
-        IntegerParam(default=INT_MAX)
-        IntegerParam(default=INT_MIN)
+ 
+    def test_absolute_property_limits(self):
+        """Test absolute limits set in config for the properties
+        are used"""
+        IntegerParam(default=settings.PARAM_INT_MAX)
+        IntegerParam(default=settings.PARAM_INT_MIN)
         with self.assertRaises(ValueError):
-            IntegerParam(default=INT_MAX+1)
+            IntegerParam(default=settings.PARAM_INT_MAX+1)
         with self.assertRaises(ValueError):
-            IntegerParam(default=INT_MIN-1)
+            IntegerParam(default=settings.PARAM_INT_MIN-1)
 
     def test_is_valid(self):
         p = IntegerParam(max=12)
@@ -693,9 +697,14 @@ class TestDecimalParam(TestCase):
 
         # Max/min value has too many digits/decimals
         with self.assertRaises(ValueError):
-            IntegerParam(max_digits=5, max=Decimal('999999'))
+            DecimalParam(max_digits=5, max=Decimal('999999'))
         with self.assertRaises(ValueError):
-            IntegerParam(max_decimals=2, min=Decimal('44.999'))
+            DecimalParam(max_decimals=2, min=Decimal('44.999'))
+
+        # Test max_decimals must be smaller or equal to max_digits
+        DecimalParam(max_digits=2, max_decimals=2)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=2, max_decimals=3)
 
         # Types
         with self.assertRaises(ValueError):
@@ -720,31 +729,33 @@ class TestDecimalParam(TestCase):
             DecimalParam(max_digits=Decimal("33"))
         with self.assertRaises(ValueError):
             DecimalParam(max_decimals=Decimal("333"))
-
+    def test_absolute_property_limits(self):
+        """Test absolute limits set in config for the properties
+        are used"""
         # Default restriction
-        DecimalParam(max=DECIMAL_MAX)
-        DecimalParam(max=DECIMAL_MIN)
-        DecimalParam(min=DECIMAL_MIN)
-        DecimalParam(min=DECIMAL_MAX)
-        DecimalParam(max_digits=DECIMAL_MAX_DIGITS)
+        DecimalParam(max=settings.PARAM_DECIMAL_MAX)
+        DecimalParam(max=settings.PARAM_DECIMAL_MIN)
+        DecimalParam(min=settings.PARAM_DECIMAL_MIN)
+        DecimalParam(min=settings.PARAM_DECIMAL_MAX)
+        DecimalParam(max_digits=settings.PARAM_DECIMAL_MAX_DIGITS)
         DecimalParam(max_digits=1)
-        DecimalParam(max_decimals=DECIMAL_MAX_DECIMALS)
+        DecimalParam(max_decimals=settings.PARAM_DECIMAL_MAX_DECIMALS)
         DecimalParam(max_decimals=0)
 
         with self.assertRaises(ValueError):
-            DecimalParam(max=DECIMAL_MAX+1)
+            DecimalParam(max=settings.PARAM_DECIMAL_MAX+1)
         with self.assertRaises(ValueError):
-            DecimalParam(max=DECIMAL_MIN-1)
+            DecimalParam(max=settings.PARAM_DECIMAL_MIN-1)
         with self.assertRaises(ValueError):
-            DecimalParam(min=DECIMAL_MIN-1)
+            DecimalParam(min=settings.PARAM_DECIMAL_MIN-1)
         with self.assertRaises(ValueError):
-            DecimalParam(min=DECIMAL_MAX+1)
+            DecimalParam(min=settings.PARAM_DECIMAL_MAX+1)
         with self.assertRaises(ValueError):
-            DecimalParam(max_digits=DECIMAL_MAX_DIGITS+1)
+            DecimalParam(max_digits=settings.PARAM_DECIMAL_MAX_DIGITS+1)
         with self.assertRaises(ValueError):
             DecimalParam(max_digits=0)
         with self.assertRaises(ValueError):
-            DecimalParam(max_decimals=DECIMAL_MAX_DECIMALS+1)
+            DecimalParam(max_decimals=settings.PARAM_DECIMAL_MAX_DECIMALS+1)
         with self.assertRaises(ValueError):
             DecimalParam(max_decimals=-1)
 
@@ -822,6 +833,11 @@ class TestDimmensionParam(TestCase):
         with self.assertRaises(ValueError):
             DimmensionParam(max=Decimal("12"), min=Decimal("13"))
 
+        # Test max_decimals must be smaller or equal to max_digits
+        DecimalParam(max_digits=2, max_decimals=2)
+        with self.assertRaises(ValueError):
+            DecimalParam(max_digits=2, max_decimals=3)
+
         # Types
         with self.assertRaises(ValueError):
             DimmensionParam(max=12)
@@ -841,29 +857,31 @@ class TestDimmensionParam(TestCase):
         with self.assertRaises(ValueError):
             DimmensionParam(min="33")
 
-        # Default restriction
-        DimmensionParam(max=DECIMAL_MAX)
+    def test_absolute_property_limits(self):
+        """Test absolute limits set in config for the properties
+        are used"""
+        DimmensionParam(max=settings.PARAM_DIMMENSION_MAX)
         DimmensionParam(max=Decimal("0"))
-        DimmensionParam(min=DECIMAL_MAX)
+        DimmensionParam(min=settings.PARAM_DIMMENSION_MAX)
         DimmensionParam(min=Decimal("0"))
-        DimmensionParam(max_digits=DECIMAL_MAX_DIGITS)
+        DimmensionParam(max_digits=settings.PARAM_DIMMENSION_MAX_DIGITS)
         DimmensionParam(max_digits=1)
-        DimmensionParam(max_decimals=DECIMAL_MAX_DECIMALS)
+        DimmensionParam(max_decimals=settings.PARAM_DIMMENSION_MAX_DECIMALS)
         DimmensionParam(max_decimals=0)
         with self.assertRaises(ValueError):
-            DimmensionParam(max=DECIMAL_MAX+1)
+            DimmensionParam(max=settings.PARAM_DIMMENSION_MAX+1)
         with self.assertRaises(ValueError):
             DimmensionParam(max=Decimal("-1"))
         with self.assertRaises(ValueError):
-            DimmensionParam(min=DECIMAL_MAX+1)
+            DimmensionParam(min=settings.PARAM_DIMMENSION_MAX+1)
         with self.assertRaises(ValueError):
             DimmensionParam(min=Decimal("-1"))
         with self.assertRaises(ValueError):
-            DimmensionParam(max_digits=DECIMAL_MAX_DIGITS+1)
+            DimmensionParam(max_digits=settings.PARAM_DIMMENSION_MAX_DIGITS+1)
         with self.assertRaises(ValueError):
             DimmensionParam(max_digits=0)
         with self.assertRaises(ValueError):
-            DimmensionParam(max_decimals=DECIMAL_MAX_DECIMALS+1)
+            DimmensionParam(max_decimals=settings.PARAM_DIMMENSION_MAX_DECIMALS+1)
         with self.assertRaises(ValueError):
             DimmensionParam(max_decimals=-1)
 

@@ -114,9 +114,6 @@ class ParamInputForm(forms.Form):
    
     Arguments:
         - params (ParamDict): Containing form fields
-
-    Examples: 
-        https://jacobian.org/writing/dynamic-form-generation/
     """
     def __init__(self, *args, **kwargs):
         """

@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from pyparsing import ParseBaseException
+from django.core.validators import MaxLengthValidator
 
 
 class ParamValidator(object):
@@ -18,6 +19,13 @@ class ParamValidator(object):
         except ValueError as err:
             # Error while creating Param
             raise ValidationError(str(err))
+
+
+
+class ParamLengthValidator(MaxLengthValidator):
+    
+    def clean(self, x):
+        return len(str(x))
 
 
 

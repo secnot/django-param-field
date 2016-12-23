@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from param_field.validators import ParamValidator
+from param_field.validators import ParamValidator, ParamLengthValidator
+from param_field.params import ParamDict
 
 class TestParamValidator(TestCase):
 
@@ -49,3 +50,19 @@ class TestParamValidator(TestCase):
         input_str = "asdfasdf: Float"
         with self.assertRaises(ValidationError):
             validator(input_str)
+
+
+
+class TestParamLengthValidator(TestCase):
+
+    def test_validator(self):
+
+        validator = ParamLengthValidator(15)
+
+        # Short param
+        validator(ParamDict("number: Integer"))
+
+        # Long param
+        with self.assertRaises(ValidationError):
+            validator(ParamDict("number1: Integer"))
+
